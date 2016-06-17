@@ -5,6 +5,8 @@
 
     <div class="row" style="margin: 0;min-height:300px;margin-top: 50px;">
 
+<!--        <a href="manage/function.php?flag=multi_search">下载</a>-->
+        <button class="btn btn-info" id="btn_download" type="button">下载</button>
         <!-- Nav tabs -->
         <ul class="nav nav-tabs" role="tablist">
             <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">单个查询</a></li>
@@ -21,6 +23,7 @@
                                type="text" id="search_info" class="form-control" value="">
                     <span class="input-group-btn scan-but-span">
                         <button class="btn btn-info" id="btn_search" type="button">查询</button>
+
                     </span>
                     </div>
 
@@ -49,7 +52,7 @@
 <script>
 
     $("#file-1").fileinput({
-        uploadUrl: '#', // you must set a valid URL here else you will get an error
+        uploadUrl: 'manage/function.php', // you must set a valid URL here else you will get an error
         allowedFileExtensions : ['xls', 'xlsx'],
         //overwriteInitial: false,
         maxFileSize: 2000,
@@ -101,7 +104,7 @@
 
             $("#btn_search").attr(' disabled="disabled');
 
-            $.post("manage/function.php", {_search_info: search_info}, function (msg){
+            $.post("manage/function.php", { flag: 'multi_search' ,_search_info: search_info}, function (msg){
                 if(msg=='fail'){
                     var d = dialog({
                         title: '结果',
@@ -116,6 +119,49 @@
                 }
 
             });
+        });
+
+        $("#btn_download").click(function(){
+            //loading事件
+            dialog({
+                id:'result_info',
+                title:'查询中，请稍后...',
+                width:150
+            }).show();
+
+            $.ajax({
+
+                url: 'manage/function.php',
+                //dataType:"json",
+                data:{flag: 'multi_search',
+//                    endtime: $('#endtime').datebox('getValue').replace(/-/g,"").substring(2),
+                },
+                type:'POST',
+                async:true,
+                beforeSend:function(){
+
+//                    $("body").showLoading();
+                },//下面就是获取到的下载地址，直接通过document.location函数获取下载
+                success:function(){
+
+//                    $("body").hideLoading();
+//                    alert(url);
+
+                    document.location.href =('manage/function.php?flag=multi_search');
+                    dialog.get('result_info').close();
+//                    window.open('manage/function.php?flag=multi_search');
+
+                },
+                error: function(){
+//                    $("body").hideLoading();
+                    sweetAlert("错误", "导出excel出错!", "error");
+                },
+
+            });
+
+//            $.get("manage/function.php?flag=multi_search",{},function (msg) {
+//                dialog.get('result_info').close();
+//            })
         });
 
         /* 响应回车事件 */
