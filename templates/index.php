@@ -104,7 +104,7 @@
 
             $("#btn_search").attr(' disabled="disabled');
 
-            $.post("manage/function.php", { flag: 'multi_search' ,_search_info: search_info}, function (msg){
+            $.post("manage/function.php", { flag: 'single_search' ,_search_info: search_info}, function (msg){
                 if(msg=='fail'){
                     var d = dialog({
                         title: '结果',
