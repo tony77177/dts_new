@@ -104,11 +104,11 @@
 
             $("#btn_search").attr(' disabled="disabled');
 
-            $.post("manage/function.php", { flag: 'single_search' ,_search_info: search_info}, function (msg){
+            $.post("manage/search.php", { flag: 'single_search' ,_search_info: search_info}, function (msg){
                 if(msg=='fail'){
                     var d = dialog({
                         title: '结果',
-                        content: '查询失败，请确认输入数据正确性'
+                        content: '查询失败，请确认输入数据的正确性。'
                     });
                     d.show();
                     dialog.get('result_info').close();
@@ -147,8 +147,26 @@
 //                    $("body").hideLoading();
 //                    alert(url);
 
-                    document.location.href =('manage/function.php?flag=multi_search');
+                    //document.location.href =('manage/function.php?flag=multi_search');
                     dialog.get('result_info').close();
+                    var d = dialog({
+                        title: '提示',
+                        content: '数据较多，需要一段时间，确认转换吗？',
+                        okValue: '确定',
+                        ok: function () {
+                            //this.title('提交中…');
+                            d.close();
+                            dialog({
+                                id:'loading',
+                                title:'转换中，请稍后...',
+                                width:150
+                            }).show();
+                            return false;
+                        },
+                        cancelValue: '取消',
+                        cancel: function () {}
+                    });
+                    d.show();
 //                    window.open('manage/function.php?flag=multi_search');
 
                 },

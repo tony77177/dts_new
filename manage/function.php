@@ -1,54 +1,12 @@
 <?php
 /**
  * Created by PhpStorm.
+ * 功能函数定义
  * User: Zhaoyu
  * Date: 2016/6/16
  * Time: 16:56
  */
 
-error_reporting(0);
-require_once('config.php');
-require_once ('../libraries/PHPExcel/PHPExcel.php');
-require_once ('../libraries/IP/IP.class.php');
-
-ini_set('user_agent','Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.0)');
-
-/*API地址拼接*/
-$api_index = $config['cur_ip_api_cfg'];//获取设置的默认API索引
-$api_link = $config['ip_api_info'][$api_index];
-
-//die(var_dump($_POST));
-
-switch ($_GET['flag']) {
-
-    /*
-     * 单个查询的情况处理
-     * */
-    case 'single_search':
-        /*POST查询数据获取*/
-        $search_info = $_POST['_search_info'];
-
-        /*API地址拼接*/
-        $api_link .= gethostbyname($search_info);
-
-        /*IP地址结果获取*/
-        $result = get_result_info($api_index, $api_link);
-
-        die($result);
-
-        break;
-
-    /*
-     * 批量查询的情况处理
-     * */
-    case 'multi_search':
-//        export_excel();
-        die(read_excel($api_index, $api_link));
-        break;
-
-    default:
-        break;
-}
 
 
 /**
@@ -57,14 +15,16 @@ switch ($_GET['flag']) {
  * $_api_link    API地址
  * return $result 结果信息
  */
-function get_result_info($_index, $_api_link){
+function get_result_info($_index, $_api_link,$_token){
     $result = "fail";
+    //die($_index);
     switch ($_index) {
 
         case 'taobao':
 
             $result_info = json_decode(get_page_info($_api_link));//获取网页请求返回内容
 
+            die(var_dump($result_info));
             //淘宝API返回code说明：0：成功，1：失败。
             if (!$result_info->code) {
                 $result = $result_info->data->country;
@@ -80,15 +40,29 @@ function get_result_info($_index, $_api_link){
 
         case 'ipip':
 
-            //$result_info = get_page_info($_api_link);
-            $result_info = file_get_contents($_api_link);//获取网页请求返回内容
+            $result_info = get_page_info($_api_link);
+            die($result_info);
+            //$result_info = file_get_contents($_api_link);//获取网页请求返回内容
 
             if ($result_info != null) {
                 $result = $result_info;
             }
 
             break;
+        case 'ipip_vip':
+            //die($_api_link);
+            $result_info = json_decode(get_page_info($_api_link,$_token));
+            //die($result_info);
+            if($result_info->ret=='ok'){
+//                $data .= '国家：'.$result_info->data[0];
+//                $data .= '<br>省会或直辖市：'.$result_info->data[1];
+//                $data .= '<br>地区或城市：'.$result_info->data[2];
+//                $data .= '<br>纬度：'.$result_info->data[5];
+//                $data .= '<br>经度：'.$result_info->data[6];
+                $result = $result_info;
+            }
 
+            break;
         case 'ip138':
 
             //截止2016年6月17日14:21:09，IP138 API接口无法访问，暂不做支持
@@ -104,32 +78,23 @@ function get_result_info($_index, $_api_link){
 /**
  * 通过CURL获取页面信息
  * @param $_url
+ * @param $_token
  * @return mixed
  */
-function get_page_info($_url){
+function get_page_info($_url,$_token){
+
+    $headers = array($_token);
+
     $ch = curl_init();
-    $timeout = 3;
-
-    curl_setopt($ch, CURLOPT_HEADER, 0);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_URL, $_url);
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
-    $data = curl_exec($ch);
+    curl_setopt($ch,CURLOPT_URL,$_url);
+    curl_setopt($ch,CURLOPT_HTTP_VERSION,CURL_HTTP_VERSION_1_1);
+    curl_setopt($ch,CURLOPT_HTTPHEADER,$headers);
+    curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
+    curl_setopt($ch,CURLOPT_CONNECTTIMEOUT,3);
+    $handles = curl_exec($ch);
     curl_close($ch);
-
-    /*
-    curl_setopt($ch, CURLOPT_HEADER, 0);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    $url = $_url;
-    curl_setopt($ch, CURLOPT_URL, $url);
-    $page = curl_exec($ch);
-    $data = array(
-        'page' => $page,
-        'http_code' => curl_getinfo($ch)['http_code']
-    );
-    curl_close($ch);
-    */
-    return $data;
+    //die(var_dump($handles));
+    return $handles;
 }
 
 
