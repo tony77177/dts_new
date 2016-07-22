@@ -7,6 +7,7 @@
  * Time: 16:56
  */
 
+require_once('../libraries/PHPExcel/PHPExcel.php');
 
 
 /**
@@ -103,14 +104,17 @@ function get_page_info($_url,$_token){
  * excel 导出文档测试
  *
  */
-function export_excel($_index,$_value){
+function export_excel($_search_info,$_result_info){
     // Create new PHPExcel object
 
 //    die(var_dump($_index."---------------".$_value));
 //    echo $_index;
 //    die($_value);
 
+//    die(print_r($_search_info));
+    //echo "<script>alert('".print_r($_search_info)."')</script>";
     $objPHPExcel = new PHPExcel();
+
 
 // Set document properties
     $objPHPExcel->getProperties()->setCreator("dts")
@@ -119,13 +123,56 @@ function export_excel($_index,$_value){
         ->setSubject("Office 2007 XLSX Document");
 
 
-// Add some data
+// 添加标题栏
     $objPHPExcel->setActiveSheetIndex(0)
-        ->setCellValue($_index, $_value);
-//        ->setCellValue('B2', 'world!')
-//        ->setCellValue('C1', 'Hello')
-//        ->setCellValue('D2', 'world!');
+        ->setCellValue('A1', '查询内容')
+        ->setCellValue('B1', 'IP地址')
+        ->setCellValue('C1', '国家')
+        ->setCellValue('D1', '省会或直辖市（国内）')
+        ->setCellValue('E1', '地区或城市 （国内）')
+        ->setCellValue('F1', '学校或单位 （国内）')
+        ->setCellValue('G1', '运营商')
+        ->setCellValue('H1', '纬度')
+        ->setCellValue('I1', '经度')
+        ->setCellValue('J1', '时区一')
+        ->setCellValue('K1', '时区二')
+        ->setCellValue('L1', '中国行政区划代码')
+        ->setCellValue('M1', '国际电话代码')
+        ->setCellValue('N1', '国家二位代码')
+        ->setCellValue('O1', '世界大洲代码');
+//    die(var_dump($objPHPExcel->setActiveSheetIndex(0)));
 
+    //$tmp = count($_search_info);
+
+//添加内容
+    for ($i = 0; $i < count($_search_info); $i++) {
+        if($_result_info[$i]->ret=='ok'){
+            $objPHPExcel->setActiveSheetIndex(0)
+                ->setCellValue('A'.($i+2), $_search_info[$i])
+                ->setCellValue('B'.($i+2), gethostbyname($_search_info[$i]))
+                ->setCellValue('C'.($i+2), $_result_info[$i]->data[0])
+                ->setCellValue('D'.($i+2), $_result_info[$i]->data[1])
+                ->setCellValue('E'.($i+2), $_result_info[$i]->data[2])
+                ->setCellValue('F'.($i+2), $_result_info[$i]->data[3])
+                ->setCellValue('G'.($i+2), $_result_info[$i]->data[4])
+                ->setCellValue('H'.($i+2), $_result_info[$i]->data[5])
+                ->setCellValue('I'.($i+2), $_result_info[$i]->data[6])
+                ->setCellValue('J'.($i+2), $_result_info[$i]->data[7])
+                ->setCellValue('K'.($i+2), $_result_info[$i]->data[8])
+                ->setCellValue('L'.($i+2), $_result_info[$i]->data[9])
+                ->setCellValue('M'.($i+2), $_result_info[$i]->data[10])
+                ->setCellValue('N'.($i+2), $_result_info[$i]->data[11])
+                ->setCellValue('O'.($i+2), $_result_info[$i]->data[12]);
+
+        }else{
+            $objPHPExcel->setActiveSheetIndex(0)
+                ->setCellValue('A'.($i+2), $_search_info[$i])
+                ->setCellValue('B'.($i+2), gethostbyname($_search_info[$i]))
+                ->setCellValue('C'.($i+2), '查询失败，请确认数据正确性');
+        }
+    }
+    //die('-------------');
+//    die(print_r($objPHPExcel->setActiveSheetIndex(0)));
 // Miscellaneous glyphs, UTF-8
 //    $objPHPExcel->setActiveSheetIndex(0)
 //        ->setCellValue('A4', 'Miscellaneous glyphs')

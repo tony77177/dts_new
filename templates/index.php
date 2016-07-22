@@ -7,19 +7,20 @@
 
 <!--        <a href="manage/function.php?flag=multi_search">下载</a>-->
         <button class="btn btn-info" id="btn_download" type="button">下载</button>
+        <a href="manage/search.php?flag=multi_search">download</a>
         <!-- Nav tabs -->
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">单个查询</a></li>
-            <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">批量查询</a></li>
+            <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">归属地查询</a></li>
+            <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">敏感信息查询</a></li>
         </ul>
 
         <!-- Tab panes -->
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane active" id="home">
                 <div class="jumbotron search-box" id="single_search_box">
-                    <p>请输入查询域名：</p>
+                    <p>请输入查询IP地址或者域名：</p>
                     <div class="input-group">
-                        <input placeholder="比如：www.baidu.com"
+                        <input placeholder="比如：8.8.8.8或www.baidu.com"
                                type="text" id="search_info" class="form-control" value="">
                     <span class="input-group-btn scan-but-span">
                         <button class="btn btn-info" id="btn_search" type="button">查询</button>
@@ -102,26 +103,53 @@
                 width:150
             }).show();
 
-            $("#btn_search").attr(' disabled="disabled');
+//            var tmp = skipEmptyElementForArray(search_info);
+            var tmp = skipEmptyElementForArray(search_info.split(' '));
+//            alert(tmp.length);
+//            for(var i in tmp){
+//                alert(tmp[i]);
+//            }
 
-            $.post("manage/search.php", { flag: 'single_search' ,_search_info: search_info}, function (msg){
-                if(msg=='fail'){
-                    var d = dialog({
-                        title: '结果',
-                        content: '查询失败，请确认输入数据的正确性。'
-                    });
-                    d.show();
-                    dialog.get('result_info').close();
-                }else{
-                    dialog.get('result_info').width('auto');
-                    dialog.get('result_info').title('查询结果');
-                    dialog.get('result_info').content(msg);
-                }
+            var url = 'manage/search.php?flag=location_search';
 
-            });
+            if (tmp.length > 1) {
+//                alert(1);
+                url = 'manage/search.php?flag=location_search&multi=1&_search_info='+tmp;
+                download_file(url);
+                dialog.get('result_info').close();
+                //return;
+//                alert(2);
+            }
+
+
+            //$("#btn_search").attr(' disabled="disabled');
+
+//            alert(tmp);
+
+//            $.get(url, {_search_info: tmp}, function (msg) {
+////                alert(msg);
+//                if (msg == 'fail') {
+//                    var d = dialog({
+//                        title: '结果',
+//                        content: '查询失败，请确认输入数据的正确性。'
+//                    });
+//                    d.show();
+//                    dialog.get('result_info').close();
+//                } else {
+//                    if (tmp.length > 1) {
+//                        download_file(url);
+//                        dialog.get('result_info').close();
+//                    } else {
+//                        dialog.get('result_info').width('auto');
+//                        dialog.get('result_info').title('查询结果');
+//                        dialog.get('result_info').content(msg);
+//                    }
+//                }
+//            });
         });
 
         $("#btn_download").click(function(){
+
             //loading事件
             dialog({
                 id:'result_info',
@@ -129,58 +157,50 @@
                 width:150
             }).show();
 
-            $.ajax({
+            //$("#btn_search").attr(' disabled="disabled');
 
-                url: 'manage/function.php',
-                //dataType:"json",
-                data:{flag: 'multi_search',
-//                    endtime: $('#endtime').datebox('getValue').replace(/-/g,"").substring(2),
-                },
-                type:'POST',
-                async:true,
-                beforeSend:function(){
 
-//                    $("body").showLoading();
-                },//下面就是获取到的下载地址，直接通过document.location函数获取下载
-                success:function(){
 
-//                    $("body").hideLoading();
-//                    alert(url);
+//            var url = "http://localhost/dts_new/manage/search.php?flag=multi_search";
+//            download_file(url);
+//            var download_iframe = document.createElement("iframe");
+//
+//            document.body.appendChild(download_iframe)
+//
+//            download_iframe.src = url;
+//            download_iframe.style.display = "none";
 
-                    //document.location.href =('manage/function.php?flag=multi_search');
-                    dialog.get('result_info').close();
-                    var d = dialog({
-                        title: '提示',
-                        content: '数据较多，需要一段时间，确认转换吗？',
-                        okValue: '确定',
-                        ok: function () {
-                            //this.title('提交中…');
-                            d.close();
-                            dialog({
-                                id:'loading',
-                                title:'转换中，请稍后...',
-                                width:150
-                            }).show();
-                            return false;
-                        },
-                        cancelValue: '取消',
-                        cancel: function () {}
-                    });
-                    d.show();
-//                    window.open('manage/function.php?flag=multi_search');
+            //dialog.get('result_info').close();
 
-                },
-                error: function(){
-//                    $("body").hideLoading();
-                    sweetAlert("错误", "导出excel出错!", "error");
-                },
+            //alert(url);
 
             });
+
+        /*通过iframe下载文件*/
+        function download_file(_url) {
+            //var url = _url;
+            var download_iframe = document.createElement("iframe");
+            document.body.appendChild(download_iframe)
+            download_iframe.src = _url;
+            download_iframe.style.display = "none";
+        }
+
+        /*去掉多余的空字符串*/
+        function skipEmptyElementForArray(arr) {
+            var a = [];
+            $.each(arr, function (i, v) {
+                var data = $.trim(v);
+                if ('' != data) {
+                    a.push(data);
+                }
+            });
+            return a;
+        }
 
 //            $.get("manage/function.php?flag=multi_search",{},function (msg) {
 //                dialog.get('result_info').close();
 //            })
-        });
+//        });
 
         /* 响应回车事件 */
         /*document.onkeydown = function(event){

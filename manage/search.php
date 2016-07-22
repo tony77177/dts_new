@@ -12,7 +12,6 @@ require_once('config.php');
 require_once('function.php');
 require_once('../class/common.class.php');
 require_once('../libraries/mysqli.class.php');
-require_once('../libraries/PHPExcel/PHPExcel.php');
 require_once('../libraries/IP/IP.class.php');
 
 ini_set('user_agent', 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.0)');
@@ -28,16 +27,31 @@ $token = $config['cur_token'];
 /*common class 声明*/
 $common = new Common($databaseinfo);
 
-switch ($_POST['flag']) {
+switch ($_GET['flag']) {
 
     /*
      * 单个查询的情况处理
      * */
-    case 'single_search':
+    case 'location_search':
         /*POST查询数据获取*/
-        $search_info = $_POST['_search_info'];
+        $search_info = $_GET['_search_info'];//获取查询内容
 
         //die(date('Y-m-d H:i:s',time()));
+        $multi_flag = $_GET['multi'];//是否为批量查询标志，1：是批量查询；其他：非批量查询
+
+        /*批量查询操作，组装成批量的API请求并生成对应的excel文档*/
+        if ($multi_flag) {
+//            die(var_dump($search_info));
+            $result_arr = array();//结果数组
+            $search_info = explode(',',$search_info);
+
+            for ($i = 0; $i < count($search_info); $i++) {
+                $result_arr[$i] = get_result_info($api_index, $api_link . gethostbyname($search_info[$i]), $token);
+            }
+
+            die(export_excel($search_info, $result_arr));
+//            die(var_dump($result_arr));
+        }
 
         /*API地址拼接*/
         $api_link .= gethostbyname($search_info);
@@ -45,6 +59,7 @@ switch ($_POST['flag']) {
         /*IP地址结果获取*/
         $result = get_result_info($api_index, $api_link, $token);
         //die(var_dump($result));
+
 
 
         //当查询成功时将数据入库
@@ -76,7 +91,8 @@ switch ($_POST['flag']) {
      * */
     case 'multi_search':
 //        export_excel();
-        die(read_excel($api_index, $api_link));
+        //
+        die(export_excel($api_index, $api_link));
         break;
 
     default:
