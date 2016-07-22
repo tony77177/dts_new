@@ -117,7 +117,7 @@
                 url = 'manage/search.php?flag=location_search&multi=1&_search_info='+tmp;
                 download_file(url);
                 dialog.get('result_info').close();
-                //return;
+                return;
 //                alert(2);
             }
 
@@ -126,26 +126,26 @@
 
 //            alert(tmp);
 
-//            $.get(url, {_search_info: tmp}, function (msg) {
-////                alert(msg);
-//                if (msg == 'fail') {
-//                    var d = dialog({
-//                        title: '结果',
-//                        content: '查询失败，请确认输入数据的正确性。'
-//                    });
-//                    d.show();
-//                    dialog.get('result_info').close();
-//                } else {
-//                    if (tmp.length > 1) {
-//                        download_file(url);
-//                        dialog.get('result_info').close();
-//                    } else {
-//                        dialog.get('result_info').width('auto');
-//                        dialog.get('result_info').title('查询结果');
-//                        dialog.get('result_info').content(msg);
-//                    }
-//                }
-//            });
+            $.get(url, {_search_info: search_info}, function (msg) {
+//                alert(msg);
+                if (msg == 'fail') {
+                    var d = dialog({
+                        title: '结果',
+                        content: '查询失败，请确认输入数据的正确性。'
+                    });
+                    d.show();
+                    dialog.get('result_info').close();
+                } else {
+                    if (tmp.length > 1) {
+                        download_file(url);
+                        dialog.get('result_info').close();
+                    } else {
+                        dialog.get('result_info').width('auto');
+                        dialog.get('result_info').title('查询结果');
+                        dialog.get('result_info').content(msg);
+                    }
+                }
+            });
         });
 
         $("#btn_download").click(function(){
