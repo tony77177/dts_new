@@ -13,6 +13,7 @@ require_once('function.php');
 require_once('../class/common.class.php');
 require_once('../libraries/mysqli.class.php');
 require_once('../libraries/IP/IP.class.php');
+require_once('../libraries/PHPExcel/PHPExcel.php');
 
 ini_set('user_agent', 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.0)');
 ini_set('date.timezone', 'Asia/Shanghai');
@@ -46,7 +47,10 @@ switch ($_GET['flag']) {
             $search_info = explode(',',$search_info);
 
             for ($i = 0; $i < count($search_info); $i++) {
-                $result_arr[$i] = get_result_info($api_index, $api_link . gethostbyname($search_info[$i]), $token);
+                $result_arr[$i] = get_location_info($api_index, $api_link . gethostbyname($search_info[$i]), $token, $search_info[$i], $databaseinfo);
+                if ($result_arr[$i]->ret == 'ok') {//查询成功时才写库
+                    $common->update_ip_adderss_info(gethostbyname($search_info[$i]), $result_arr[$i]->data[0], $result_arr[$i]->data[1], $result_arr[$i]->data[2], $result_arr[$i]->data[3], $result_arr[$i]->data[4], $result_arr[$i]->data[5], $result_arr[$i]->data[6], $result_arr[$i]->data[7], $result_arr[$i]->data[8], $result_arr[$i]->data[9], $result_arr[$i]->data[10], $result_arr[$i]->data[11], $result_arr[$i]->data[12], date('Y-m-d H:i:s', time()), $curr_interval_update_time);
+                }
             }
 
             die(export_excel($search_info, $result_arr));
@@ -57,7 +61,7 @@ switch ($_GET['flag']) {
         $api_link .= gethostbyname($search_info);
 
         /*IP地址结果获取*/
-        $result = get_result_info($api_index, $api_link, $token);
+        $result = get_location_info($api_index, $api_link, $token, $search_info, $databaseinfo);
         //die(var_dump($result));
 
 
@@ -65,16 +69,23 @@ switch ($_GET['flag']) {
         //当查询成功时将数据入库
         if ($result != 'fail') {
 
-            $common->update_ip_adderss_info(trim(gethostbyname($search_info)), $result->data[0], $result->data[1], $result->data[2], $result->data[3], $result->data[4], $result->data[5], $result->data[6], $result->data[7], $result->data[8], $result->data[9], $result->data[10], $result->data[11], $result->data[12], date('Y-m-d H:i:s', time()));
+            $common->update_ip_adderss_info(trim(gethostbyname($search_info)), $result->data[0], $result->data[1], $result->data[2], $result->data[3], $result->data[4], $result->data[5], $result->data[6], $result->data[7], $result->data[8], $result->data[9], $result->data[10], $result->data[11], $result->data[12], date('Y-m-d H:i:s', time()), $curr_interval_update_time);
 
             //die(($result->data[0]));
 
-            $tmp_data = '国家：' . $result->data[0];
-
-            $tmp_data .= '<br>省会或直辖市：' . $result->data[1];
-            $tmp_data .= '<br>地区或城市：' . $result->data[2];
-            $tmp_data .= '<br>纬度：' . $result->data[5];
-            $tmp_data .= '<br>经度：' . $result->data[6];
+            $tmp_data = '国家：' . (($result->data[0] != '') ? $result->data[0] : 'N/A');
+            $tmp_data .= '<br>省会或直辖市：' . (($result->data[1] != '') ? $result->data[1] : 'N/A');
+            $tmp_data .= '<br>地区或城市：' . (($result->data[2] != '') ? $result->data[2] : 'N/A');
+            $tmp_data .= '<br>学校或单位：' . (($result->data[3] != '') ? $result->data[3] : 'N/A');
+            $tmp_data .= '<br>运营商：' . (($result->data[4] != '') ? $result->data[4] : 'N/A');
+            $tmp_data .= '<br>纬度：' . (($result->data[5] != '') ? $result->data[5] : 'N/A');
+            $tmp_data .= '<br>经度：' . (($result->data[6] != '') ? $result->data[6] : 'N/A');
+            $tmp_data .= '<br>时区一：' . (($result->data[7] != '') ? $result->data[7] : 'N/A');
+            $tmp_data .= '<br>时区二：' . (($result->data[8] != '') ? $result->data[8] : 'N/A');
+            $tmp_data .= '<br>中国行政区划代码：' . (($result->data[9] != '') ? $result->data[9] : 'N/A');
+            $tmp_data .= '<br>国际电话代码：' . (($result->data[10] != '') ? $result->data[10] : 'N/A');
+            $tmp_data .= '<br>国家二位代码：' . (($result->data[11] != '') ? $result->data[11] : 'N/A');
+            $tmp_data .= '<br>世界大洲代码：' . (($result->data[12] != '') ? $result->data[12] : 'N/A');
             $result = $tmp_data;
 
         }

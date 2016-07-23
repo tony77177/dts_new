@@ -108,6 +108,32 @@ class Database {
         }
     }
 
+    /**
+     * 通过SQL获取数据
+     * @param $sql
+     * @return null
+     */
+    public function GetResult($sql){
+        if ($this->Open()) {
+            $db = $this->Conn;
+            $db->query($sql);
+            $result = $db->query($sql);
+            if ($result) {
+                $row = $result->fetch_array();
+//                $i = 0;
+//                while ($row) {
+//                    $datatable[$i] = $row;
+//                    $i++;
+//                    $row = $result->fetch_array();
+//                }
+            }
+            return $row;
+//            return $datatable;
+        } else {
+            return null;
+        }
+    }
+
     //关闭数据库连接
     public function Close() {
         if ($this->isOpen) {

@@ -1,98 +1,97 @@
 
 <?php require_once('templates/common/header.php');?>
 
+<hr style=""/>
+
 <div class="container">
 
     <div class="row" style="margin: 0;min-height:300px;margin-top: 50px;">
 
-<!--        <a href="manage/function.php?flag=multi_search">下载</a>-->
-        <button class="btn btn-info" id="btn_download" type="button">下载</button>
-        <a href="manage/search.php?flag=multi_search">download</a>
         <!-- Nav tabs -->
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">归属地查询</a></li>
-            <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">敏感信息查询</a></li>
+            <li role="presentation" class="active">
+                <a href="#home" aria-controls="home" role="tab" data-toggle="tab">
+                    <span class="glyphicon glyphicon-globe"></span>
+                    &nbsp;归属地查询
+                </a>
+            </li>
+            <li role="presentation">
+                <a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">
+                    <span class="glyphicon glyphicon-eye-open"></span>
+                    &nbsp;敏感信息查询
+                </a>
+            </li>
         </ul>
 
         <!-- Tab panes -->
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane active" id="home">
                 <div class="jumbotron search-box" id="single_search_box">
-                    <p>请输入查询IP地址或者域名：</p>
+                    <p><span class="glyphicon glyphicon-triangle-bottom"></span> 请输入IP地址或者域名：</p>
                     <div class="input-group">
-                        <input placeholder="比如：8.8.8.8或www.baidu.com"
+                        <input placeholder="比如：114.114.114.114 或 www.baidu.com"
                                type="text" id="search_info" class="form-control" value="">
                     <span class="input-group-btn scan-but-span">
-                        <button class="btn btn-info" id="btn_search" type="button">查询</button>
-
+                        <button class="btn btn-info" id="btn_search" type="button">
+                            <span class="glyphicon glyphicon-search"></span>
+                            &nbsp;查询
+                        </button>
                     </span>
                     </div>
 
                 </div>
             </div>
             <div role="tabpanel" class="tab-pane" id="profile">
-                <div class="form-group">
-                    <input id="file-1" type="file" multiple class="file">
-                    <div id="errorBlock" class="help-block"></div>
+                <div class="jumbotron search-box" id="single_search_box">
+
+                    <p><span class="glyphicon glyphicon-triangle-bottom"></span> 请输入查询信息：</p>
+                    <select class="threat_option">
+                        <option></option>
+                        <option value="email">邮箱</option>
+                        <option value="domain">域名</option>
+                        <option value="ip">IP地址</option>
+                        <option value="hash">Hash</option>
+                        <option value="antivirus">Antivirus</option>
+                    </select>
+                    <div class="input-group">
+                        <input placeholder="请输入查询信息"
+                               type="text" id="threat_info" class="form-control" value="">
+                        <span class="input-group-btn scan-but-span">
+                            <button class="btn btn-info" id="btn_threat" type="button">
+                                <span class="glyphicon glyphicon-search"></span>
+                                &nbsp;查询
+                            </button>
+                        </span>
+                    </div>
+
                 </div>
             </div>
         </div>
 
     </div>
 
-    <!--    <div class="row" style="margin: 0;min-height:300px;margin-top: 100px;">-->
-    <!--        <ul class="nav nav-tabs">-->
-    <!--            <li role="presentation" class="active"><a href="#">Home</a></li>-->
-    <!--            <li role="presentation"><a href="javascript:" onclick="switch_btn(1)">Profile</a></li>-->
-    <!--            <li role="presentation"><a href="#">Messages</a></li>-->
-    <!--        </ul>-->
-    <!---->
-    <!--    </div>-->
 </div>
 
 <script>
 
-    $("#file-1").fileinput({
-        uploadUrl: 'manage/function.php', // you must set a valid URL here else you will get an error
-        allowedFileExtensions : ['xls', 'xlsx'],
-        //overwriteInitial: false,
-        maxFileSize: 2000,
-        maxFilesNum: 1,
-        showCancel: true,
-        maxFileCount: 1,
-        uploadAsync: true,
-        //allowedFileTypes: ['image', 'video', 'flash'],
-//        slugCallback: function(filename) {
-//            return filename.replace('(', '_').replace(']', '_');
-//        }
-
-        language: 'zh', //设置语言
-        //allowedFileExtensions : ['xls', 'xlsx'],
-//        uploadUrl: uploadUrl, //上传的地址
-        //allowedFileExtensions : ['jpg', 'png','gif'],//接收的文件后缀
-//        showUpload: false, //是否显示上传按钮
-        showCaption: false,//是否显示标题
-//        browseClass: "btn btn-primary", //按钮样式
-//        previewFileIcon: "<i class='glyphicon glyphicon-king'></i>",
-    });
-
-
-
-
-
-
     $(document).ready(function() {
+
+        $(".threat_option").select2({
+            placeholder: "请选择查询类别",
+            minimumResultsForSearch: Infinity,
+            width: '150px'
+        });
 
         $("#btn_search").click(function(){
             var search_info = $("#search_info").val();
             if(search_info==''){
                 var d = dialog({
-                    content: '请输入查询域名'
+                    content: '请输入查询内容'
                 });
                 d.show();
                 setTimeout(function () {
                     d.close().remove();
-                }, 2000);
+                }, 1500);
                 return false;
             }
 
@@ -103,31 +102,17 @@
                 width:150
             }).show();
 
-//            var tmp = skipEmptyElementForArray(search_info);
             var tmp = skipEmptyElementForArray(search_info.split(' '));
-//            alert(tmp.length);
-//            for(var i in tmp){
-//                alert(tmp[i]);
-//            }
-
             var url = 'manage/search.php?flag=location_search';
 
             if (tmp.length > 1) {
-//                alert(1);
                 url = 'manage/search.php?flag=location_search&multi=1&_search_info='+tmp;
                 download_file(url);
                 dialog.get('result_info').close();
                 return;
-//                alert(2);
             }
 
-
-            //$("#btn_search").attr(' disabled="disabled');
-
-//            alert(tmp);
-
             $.get(url, {_search_info: search_info}, function (msg) {
-//                alert(msg);
                 if (msg == 'fail') {
                     var d = dialog({
                         title: '结果',
@@ -136,45 +121,30 @@
                     d.show();
                     dialog.get('result_info').close();
                 } else {
-                    if (tmp.length > 1) {
-                        download_file(url);
-                        dialog.get('result_info').close();
-                    } else {
-                        dialog.get('result_info').width('auto');
-                        dialog.get('result_info').title('查询结果');
-                        dialog.get('result_info').content(msg);
-                    }
+                    dialog.get('result_info').width('auto');
+                    dialog.get('result_info').title('查询结果');
+                    dialog.get('result_info').content(msg);
                 }
             });
+
+        });
+        
+        $("#btn_threat").click(function () {
+            var threat_option = $(".threat_option").val();
+            var threat_info = $.trim($("#threat_info").val());
+            if (search_info == '' || threat_info == '') {
+                var d = dialog({
+                    content: '请输入查询内容'
+                });
+                d.show();
+                setTimeout(function () {
+                    d.close().remove();
+                }, 1500);
+                return false;
+            }
+
         });
 
-        $("#btn_download").click(function(){
-
-            //loading事件
-            dialog({
-                id:'result_info',
-                title:'查询中，请稍后...',
-                width:150
-            }).show();
-
-            //$("#btn_search").attr(' disabled="disabled');
-
-
-
-//            var url = "http://localhost/dts_new/manage/search.php?flag=multi_search";
-//            download_file(url);
-//            var download_iframe = document.createElement("iframe");
-//
-//            document.body.appendChild(download_iframe)
-//
-//            download_iframe.src = url;
-//            download_iframe.style.display = "none";
-
-            //dialog.get('result_info').close();
-
-            //alert(url);
-
-            });
 
         /*通过iframe下载文件*/
         function download_file(_url) {
@@ -196,11 +166,6 @@
             });
             return a;
         }
-
-//            $.get("manage/function.php?flag=multi_search",{},function (msg) {
-//                dialog.get('result_info').close();
-//            })
-//        });
 
         /* 响应回车事件 */
         /*document.onkeydown = function(event){

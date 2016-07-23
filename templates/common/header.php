@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <title>域名批量解析系统 V1.0</title>
+    <title>批量信息解析系统 V1.0</title>
     <meta charset="utf-8">
 
     <!-- Bootstrap CSS -->
     <link href="resource/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
-<!--    <link href="res/bootstrap/css/default.css" rel="stylesheet" type="text/css">-->
-    <link href="resource/bootstrap/css/fileinput.min.css" rel="stylesheet" type="text/css">
+<!--    <link href="http://v3.bootcss.com/examples/cover/cover.css" rel="stylesheet" type="text/css">-->
 
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -26,8 +25,10 @@
 
     <!-- Bootstrap JS -->
     <script src="resource/bootstrap/js/bootstrap.min.js"></script>
-    <script src="resource/bootstrap/js/fileinput.min.js"></script>
-    <script src="resource/bootstrap/js/fileinput_locale_zh.js"></script>
+
+    <!-- Select2 -->
+    <link href="resource/select2/select2.min.css" rel="stylesheet" />
+    <script src="resource/select2/select2.min.js"></script>
 
 </head>
 
@@ -43,7 +44,10 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" style="color: #fff;" href="">域名批量解析系统</a>
+            <a class="navbar-brand" style="color: #fff;" href="">
+                <span class="glyphicon glyphicon-menu-hamburger"></span>
+                批量信息解析系统
+            </a>
             <!--<a class="navbar-brand" style="color: #fff;" href="">域名批量解析系统1</a>
             <a class="navbar-brand" style="color: #fff;" href="">域名批量解析系统2</a>-->
         </div>

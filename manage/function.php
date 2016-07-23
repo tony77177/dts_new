@@ -7,16 +7,16 @@
  * Time: 16:56
  */
 
-require_once('../libraries/PHPExcel/PHPExcel.php');
+
 
 
 /**
- * 获取目标地址
+ * 获取归属地信息
  * $_index       索引号 //用来区分调用哪个网站API
  * $_api_link    API地址
  * return $result 结果信息
  */
-function get_result_info($_index, $_api_link,$_token){
+function get_location_info($_index, $_api_link,$_token,$_search_info,$_dbinfo){
     $result = "fail";
     //die($_index);
     switch ($_index) {
@@ -25,7 +25,7 @@ function get_result_info($_index, $_api_link,$_token){
 
             $result_info = json_decode(get_page_info($_api_link));//获取网页请求返回内容
 
-            die(var_dump($result_info));
+            //die(var_dump($result_info));
             //淘宝API返回code说明：0：成功，1：失败。
             if (!$result_info->code) {
                 $result = $result_info->data->country;
@@ -52,15 +52,41 @@ function get_result_info($_index, $_api_link,$_token){
             break;
         case 'ipip_vip':
             //die($_api_link);
-            $result_info = json_decode(get_page_info($_api_link,$_token));
-            //die($result_info);
-            if($result_info->ret=='ok'){
-//                $data .= '国家：'.$result_info->data[0];
-//                $data .= '<br>省会或直辖市：'.$result_info->data[1];
-//                $data .= '<br>地区或城市：'.$result_info->data[2];
-//                $data .= '<br>纬度：'.$result_info->data[5];
-//                $data .= '<br>经度：'.$result_info->data[6];
-                $result = $result_info;
+            /**
+             * 此处逻辑：
+             *      1、先通过数据库查询是否存在相关的数据，如若存在，则可直接返回
+             *      2、如果数据库不存在相关数据，则通过API去拉取最新数据
+             */
+            $common = new Common($_dbinfo);
+            $result_info = $common->get_location_info(gethostbyname($_search_info));
+            if ($result_info != null) {
+                //组装JSON数据
+                $tmp_data = array(
+                    "ret" => "ok",
+                    "data" => array(
+                        $result_info['Country'],
+                        $result_info['Province'],
+                        $result_info['City'],
+                        $result_info['Organization'],
+                        $result_info['Telecom'],
+                        $result_info['Longitude'],
+                        $result_info['Latitude'],
+                        $result_info['Area1'],
+                        $result_info['Area2'],
+                        $result_info['AdDivisions'],
+                        $result_info['InterNum'],
+                        $result_info['CountryNum'],
+                        $result_info['Continents']
+                    )
+                );
+//                $tmp_data = json_encode($tmp_data);
+//                $tmp_data = json_decode($tmp_data);
+                $result = json_decode(json_encode($tmp_data));
+            } else {
+                $result_info = json_decode(get_page_info($_api_link, $_token));
+                if ($result_info->ret == 'ok') {
+                    $result = $result_info;
+                }
             }
 
             break;
@@ -100,20 +126,15 @@ function get_page_info($_url,$_token){
 
 
 /**
- *
- * excel 导出文档测试
- *
+ * 批量导出查询结果
+ * @param $_search_info 查询内容
+ * @param $_result_info 查询结果
+ * @throws PHPExcel_Reader_Exception    输出excel文档
  */
 function export_excel($_search_info,$_result_info){
-    // Create new PHPExcel object
 
-//    die(var_dump($_index."---------------".$_value));
-//    echo $_index;
-//    die($_value);
-
-//    die(print_r($_search_info));
-    //echo "<script>alert('".print_r($_search_info)."')</script>";
     $objPHPExcel = new PHPExcel();
+    $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
 
 
 // Set document properties
@@ -123,14 +144,14 @@ function export_excel($_search_info,$_result_info){
         ->setSubject("Office 2007 XLSX Document");
 
 
-// 添加标题栏
+// 设置标题栏
     $objPHPExcel->setActiveSheetIndex(0)
         ->setCellValue('A1', '查询内容')
         ->setCellValue('B1', 'IP地址')
         ->setCellValue('C1', '国家')
-        ->setCellValue('D1', '省会或直辖市（国内）')
-        ->setCellValue('E1', '地区或城市 （国内）')
-        ->setCellValue('F1', '学校或单位 （国内）')
+        ->setCellValue('D1', '省会或直辖市')
+        ->setCellValue('E1', '地区或城市')
+        ->setCellValue('F1', '学校或单位')
         ->setCellValue('G1', '运营商')
         ->setCellValue('H1', '纬度')
         ->setCellValue('I1', '经度')
@@ -140,9 +161,14 @@ function export_excel($_search_info,$_result_info){
         ->setCellValue('M1', '国际电话代码')
         ->setCellValue('N1', '国家二位代码')
         ->setCellValue('O1', '世界大洲代码');
-//    die(var_dump($objPHPExcel->setActiveSheetIndex(0)));
 
-    //$tmp = count($_search_info);
+    //设置字体加粗、字体大小及垂直居中
+    $objPHPExcel->setActiveSheetIndex(0)->getStyle('A1:O1')->getFont()->setSize(12);
+    $objPHPExcel->setActiveSheetIndex(0)->getStyle('A1:O1')->getFont()->setBold(true);
+    $objPHPExcel->setActiveSheetIndex(0)->getStyle('A1:O1')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);////水平对齐
+    $objPHPExcel->setActiveSheetIndex(0)->getStyle('A1:O1')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);////垂直平对齐
+    $objPHPExcel->setActiveSheetIndex(0)->getRowDimension(1)->setRowHeight(25);//行高
+
 
 //添加内容
     for ($i = 0; $i < count($_search_info); $i++) {
@@ -169,14 +195,22 @@ function export_excel($_search_info,$_result_info){
                 ->setCellValue('A'.($i+2), $_search_info[$i])
                 ->setCellValue('B'.($i+2), gethostbyname($_search_info[$i]))
                 ->setCellValue('C'.($i+2), '查询失败，请确认数据正确性');
+            $objPHPExcel->setActiveSheetIndex(0)->mergeCells('C' . ($i + 2) . ':O' . (($i + 2)));//合并单元格
+
         }
+
+        //设置列宽度
+        $objPHPExcel->setActiveSheetIndex(0)->getColumnDimension('A')->setAutoSize(true);
+        $objPHPExcel->setActiveSheetIndex(0)->getColumnDimension('B')->setAutoSize(true);
+        $objPHPExcel->setActiveSheetIndex(0)->getColumnDimension('D')->setWidth(17);
+        $objPHPExcel->setActiveSheetIndex(0)->getColumnDimension('E')->setWidth(14);
+        $objPHPExcel->setActiveSheetIndex(0)->getColumnDimension('F')->setWidth(15);
+        $objPHPExcel->setActiveSheetIndex(0)->getColumnDimension('J')->setWidth(15);
+
+        //设置列垂直居中
+        $objPHPExcel->setActiveSheetIndex(0)->getStyle('A' . ($i + 2) . ':O' . ($i + 2))->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+
     }
-    //die('-------------');
-//    die(print_r($objPHPExcel->setActiveSheetIndex(0)));
-// Miscellaneous glyphs, UTF-8
-//    $objPHPExcel->setActiveSheetIndex(0)
-//        ->setCellValue('A4', 'Miscellaneous glyphs')
-//        ->setCellValue('A5', 'éàèùâêîôûëïüÿäöüç');
 
 // Rename worksheet
     $objPHPExcel->getActiveSheet()->setTitle('查询结果');
@@ -199,7 +233,7 @@ function export_excel($_search_info,$_result_info){
     header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
     header('Pragma: public'); // HTTP/1.0
 
-    $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+
     $objWriter->save('php://output');
 }
 
@@ -253,7 +287,7 @@ function read_excel($_api_index,$_api_link){
 //        echo $_api_link . "<br>" . $api_link."<br>";
 
         /*IP地址结果获取*/
-        $result = get_result_info($_api_index, $api_link);
+        $result = get_location_info($_api_index, $api_link);
         if ($result != 'fail') {
             $result_info[$row - 2] = $result;
         } else {
