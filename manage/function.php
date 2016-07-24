@@ -115,7 +115,9 @@ function get_page_info($_url,$_token){
     $ch = curl_init();
     curl_setopt($ch,CURLOPT_URL,$_url);
     curl_setopt($ch,CURLOPT_HTTP_VERSION,CURL_HTTP_VERSION_1_1);
-    curl_setopt($ch,CURLOPT_HTTPHEADER,$headers);
+    if($_token!=''){
+        curl_setopt($ch,CURLOPT_HTTPHEADER,$headers);
+    }
     curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
     curl_setopt($ch,CURLOPT_CONNECTTIMEOUT,3);
     $handles = curl_exec($ch);

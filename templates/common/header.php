@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <title>批量信息解析系统 V1.0</title>
+    <title><?php echo $config['cur_sys_title'];?> V1.0</title>
     <meta charset="utf-8">
 
     <!-- Bootstrap CSS -->
@@ -46,7 +46,7 @@
             </button>
             <a class="navbar-brand" style="color: #fff;" href="">
                 <span class="glyphicon glyphicon-menu-hamburger"></span>
-                批量信息解析系统
+                <?php echo $config['cur_sys_title'];?>
             </a>
             <!--<a class="navbar-brand" style="color: #fff;" href="">域名批量解析系统1</a>
             <a class="navbar-brand" style="color: #fff;" href="">域名批量解析系统2</a>-->

@@ -128,11 +128,11 @@
             });
 
         });
-        
+
         $("#btn_threat").click(function () {
             var threat_option = $(".threat_option").val();
             var threat_info = $.trim($("#threat_info").val());
-            if (search_info == '' || threat_info == '') {
+            if (threat_option == '' || threat_info == '') {
                 var d = dialog({
                     content: '请输入查询内容'
                 });
@@ -142,6 +142,38 @@
                 }, 1500);
                 return false;
             }
+
+            //loading事件
+            dialog({
+                id: 'result_info',
+                title: '查询中，请稍后...',
+                width: 150
+            }).show();
+
+//            var tmp = skipEmptyElementForArray(search_info.split(' '));
+            var url = 'manage/search.php?flag=threat_search';
+
+//            if (tmp.length > 1) {
+//                url = 'manage/search.php?flag=threat_search&multi=1&_search_info=' + tmp;
+//                download_file(url);
+//                dialog.get('result_info').close();
+//                return;
+//            }
+
+            $.get(url, {_threat_option: threat_option, _threat_info: threat_info}, function (msg) {
+                if (msg == 'fail') {
+                    var d = dialog({
+                        title: '结果',
+                        content: '查询失败，请确认输入数据的正确性。'
+                    });
+                    d.show();
+                    dialog.get('result_info').close();
+                } else {
+                    dialog.get('result_info').width('auto');
+                    dialog.get('result_info').title('查询结果');
+                    dialog.get('result_info').content(msg);
+                }
+            });
 
         });
 

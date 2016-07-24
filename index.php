@@ -6,6 +6,7 @@
  * Time: 16:34
  */
 
-
+require_once('manage/config.php');
 require_once('templates/index.php');
+
 ?>

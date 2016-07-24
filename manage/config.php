@@ -65,6 +65,26 @@ $config['cur_token'] = 'Token: 89bd0fbbb124c00a1bdec009208517cc7277b2bc';
 
 /**
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *             获取威胁信息API配置
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * 配置威胁信息获取API接口，默认有5种查询方式：邮箱、域名、IP地址、hash及antivirus
+ * API文档地址：https://github.com/threatcrowd/ApiV2
+ *
+ *
+ */
+$config['threat_info_api'] = array(
+    'email' => 'https://www.threatcrowd.org/searchApi/v2/email/report/?email=',
+    'domain' => 'https://www.threatcrowd.org/searchApi/v2/domain/report/?domain=',
+    'ip' => 'https://www.threatcrowd.org/searchApi/v2/ip/report/?ip=',
+    'hash' => 'https://www.threatcrowd.org/searchApi/v2/file/report/?resource=',
+    'antivirus' => 'https://www.threatcrowd.org/searchApi/v2/antivirus/report/?antivirus='
+);
+
+
+
+/**
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *             数据库信息设置
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
@@ -95,4 +115,17 @@ $databaseinfo = array(
  *
  */
 $curr_interval_update_time = '86400';
+
+
+
+/**
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *        设置系统名称
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * 设置系统名称
+ *
+ */
+$config['cur_sys_title'] = '批量信息解析系统';
+
 ?>

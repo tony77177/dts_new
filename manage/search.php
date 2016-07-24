@@ -34,15 +34,11 @@ switch ($_GET['flag']) {
      * 单个查询的情况处理
      * */
     case 'location_search':
-        /*POST查询数据获取*/
         $search_info = $_GET['_search_info'];//获取查询内容
-
-        //die(date('Y-m-d H:i:s',time()));
         $multi_flag = $_GET['multi'];//是否为批量查询标志，1：是批量查询；其他：非批量查询
 
         /*批量查询操作，组装成批量的API请求并生成对应的excel文档*/
         if ($multi_flag) {
-//            die(var_dump($search_info));
             $result_arr = array();//结果数组
             $search_info = explode(',',$search_info);
 
@@ -54,7 +50,6 @@ switch ($_GET['flag']) {
             }
 
             die(export_excel($search_info, $result_arr));
-//            die(var_dump($result_arr));
         }
 
         /*API地址拼接*/
@@ -62,17 +57,14 @@ switch ($_GET['flag']) {
 
         /*IP地址结果获取*/
         $result = get_location_info($api_index, $api_link, $token, $search_info, $databaseinfo);
-        //die(var_dump($result));
-
-
 
         //当查询成功时将数据入库
         if ($result != 'fail') {
 
+            //查询成功，进行入库操作
             $common->update_ip_adderss_info(trim(gethostbyname($search_info)), $result->data[0], $result->data[1], $result->data[2], $result->data[3], $result->data[4], $result->data[5], $result->data[6], $result->data[7], $result->data[8], $result->data[9], $result->data[10], $result->data[11], $result->data[12], date('Y-m-d H:i:s', time()), $curr_interval_update_time);
 
-            //die(($result->data[0]));
-
+            //组装单个查询前台显示列表
             $tmp_data = '国家：' . (($result->data[0] != '') ? $result->data[0] : 'N/A');
             $tmp_data .= '<br>省会或直辖市：' . (($result->data[1] != '') ? $result->data[1] : 'N/A');
             $tmp_data .= '<br>地区或城市：' . (($result->data[2] != '') ? $result->data[2] : 'N/A');
@@ -86,24 +78,54 @@ switch ($_GET['flag']) {
             $tmp_data .= '<br>国际电话代码：' . (($result->data[10] != '') ? $result->data[10] : 'N/A');
             $tmp_data .= '<br>国家二位代码：' . (($result->data[11] != '') ? $result->data[11] : 'N/A');
             $tmp_data .= '<br>世界大洲代码：' . (($result->data[12] != '') ? $result->data[12] : 'N/A');
-            $result = $tmp_data;
 
+            //结果赋值
+            $result = $tmp_data;
         }
 
-
-        //$result_info = json_decode(get_page_info($_api_link,$token));
-
         die($result);
-
         break;
 
     /*
-     * 批量查询的情况处理
+     * 微威胁信息查询
      * */
-    case 'multi_search':
-//        export_excel();
-        //
-        die(export_excel($api_index, $api_link));
+    case 'threat_search':
+        $threat_option = $_GET['_threat_option'];//获取查询类别
+        $threat_info = $_GET['_threat_info'];//获取查询内容
+
+        /*API地址拼接*/
+        $threat_api_link = $config['threat_info_api'][$threat_option].$threat_info;
+
+        /*IP地址结果获取*/
+        $result = get_page_info($threat_api_link,'');
+
+        //当查询成功时将数据入库
+//        if ($result != 'fail') {
+//
+//            //查询成功，进行入库操作
+//            $common->update_ip_adderss_info(trim(gethostbyname($search_info)), $result->data[0], $result->data[1], $result->data[2], $result->data[3], $result->data[4], $result->data[5], $result->data[6], $result->data[7], $result->data[8], $result->data[9], $result->data[10], $result->data[11], $result->data[12], date('Y-m-d H:i:s', time()), $curr_interval_update_time);
+//
+//            //组装单个查询前台显示列表
+//            $tmp_data = '国家：' . (($result->data[0] != '') ? $result->data[0] : 'N/A');
+//            $tmp_data .= '<br>省会或直辖市：' . (($result->data[1] != '') ? $result->data[1] : 'N/A');
+//            $tmp_data .= '<br>地区或城市：' . (($result->data[2] != '') ? $result->data[2] : 'N/A');
+//            $tmp_data .= '<br>学校或单位：' . (($result->data[3] != '') ? $result->data[3] : 'N/A');
+//            $tmp_data .= '<br>运营商：' . (($result->data[4] != '') ? $result->data[4] : 'N/A');
+//            $tmp_data .= '<br>纬度：' . (($result->data[5] != '') ? $result->data[5] : 'N/A');
+//            $tmp_data .= '<br>经度：' . (($result->data[6] != '') ? $result->data[6] : 'N/A');
+//            $tmp_data .= '<br>时区一：' . (($result->data[7] != '') ? $result->data[7] : 'N/A');
+//            $tmp_data .= '<br>时区二：' . (($result->data[8] != '') ? $result->data[8] : 'N/A');
+//            $tmp_data .= '<br>中国行政区划代码：' . (($result->data[9] != '') ? $result->data[9] : 'N/A');
+//            $tmp_data .= '<br>国际电话代码：' . (($result->data[10] != '') ? $result->data[10] : 'N/A');
+//            $tmp_data .= '<br>国家二位代码：' . (($result->data[11] != '') ? $result->data[11] : 'N/A');
+//            $tmp_data .= '<br>世界大洲代码：' . (($result->data[12] != '') ? $result->data[12] : 'N/A');
+//
+//            //结果赋值
+//            $result = $tmp_data;
+//        }
+
+        die($result);
+
         break;
 
     default:
