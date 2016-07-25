@@ -102,27 +102,71 @@ function get_location_info($_index, $_api_link,$_token,$_search_info,$_dbinfo){
     return $result;
 }
 
+
+function get_threat_info($_result_info,$_flag){
+    $result= 'fail';
+    switch ($_flag){
+        case 'email':
+            $tmp_data = '';
+            for ($i = 0; $i < count($_result_info->domains); $i++) {
+                if ($i == 0) {
+//                    $tmp_data = 'domains：' . (($_result_info->domains[$i] != '') ? $_result_info->domains[$i] : 'N/A');
+                    $tmp_data = 'domains：' . $_result_info->domains[$i].',';
+                } else {
+                    $tmp_data .= '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . (($_result_info->domains[0] != '') ? $_result_info->domains[$i] : 'N/A');
+                }
+            }
+
+            for ($i = 0; $i < count($_result_info->references); $i++) {
+                if ($i == 0) {
+                    $tmp_data = 'domains：' . (($_result_info->references[$i] != '') ? $_result_info->references[$i] : 'N/A');
+                } else {
+                    $tmp_data = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . (($_result_info->references[0] != '') ? $_result_info->references[$i] : 'N/A');
+                }
+            }
+
+            $tmp_data .= '<br>省会或直辖市：' . (($result->data[1] != '') ? $result->data[1] : 'N/A');
+            $tmp_data .= '<br>地区或城市：' . (($result->data[2] != '') ? $result->data[2] : 'N/A');
+            $tmp_data .= '<br>学校或单位：' . (($result->data[3] != '') ? $result->data[3] : 'N/A');
+            $result = $tmp_data;
+            break;
+        default;
+            break;
+    }
+    return $result;
+}
+
+
+
 /**
  * 通过CURL获取页面信息
  * @param $_url
  * @param $_token
  * @return mixed
  */
-function get_page_info($_url,$_token){
-
+function get_page_info($_url, $_token){
     $headers = array($_token);
-
     $ch = curl_init();
-    curl_setopt($ch,CURLOPT_URL,$_url);
-    curl_setopt($ch,CURLOPT_HTTP_VERSION,CURL_HTTP_VERSION_1_1);
-    if($_token!=''){
-        curl_setopt($ch,CURLOPT_HTTPHEADER,$headers);
+    curl_setopt($ch, CURLOPT_URL, $_url);
+    curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+
+    /**
+     * 此处用于区分归属地信息查询和威胁信息查询：
+     * 1、归属新为HTTP请求带token
+     * 2、威胁信息查询为HTTPS请求，不带token
+     * 所以需要根据不同情况设置不同参数
+     */
+
+    if ($_token != '') {
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    } else {
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE); // https请求 不验证证书和hosts
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
     }
-    curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
-    curl_setopt($ch,CURLOPT_CONNECTTIMEOUT,3);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
     $handles = curl_exec($ch);
     curl_close($ch);
-    //die(var_dump($handles));
     return $handles;
 }
 
