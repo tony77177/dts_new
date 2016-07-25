@@ -37,14 +37,24 @@ class Common{
      * @param $_Curr_interval_update_time   更新数据间隔时间
      */
     public function update_ip_adderss_info($_IPAddress, $_Country, $_Province, $_City, $_Organization, $_Telecom, $_Longitude, $_Latitude, $_Area1, $_Area2, $_AdDivisions, $_InterNum, $_CountryNum, $_Continents, $_Update_time, $_Curr_interval_update_time){
-//        $sql = 'INSERT INTO searip (IPAddress,Country,Province,City,Organization,Telecom,Longitude,Latitude,Area1,Area2,AdDivisions,InterNum,CountryNum,Continents,Update_time) VALUES ';
-//        $sql .= '("' . $_IPAddress . '","' . $_Country . '","' . $_Province . '","' . $_City . '","' . $_Organization . '","' . $_Telecom . '","' . $_Longitude . '","' . $_Latitude . '","' . $_Area1 . '","' . $_Area2 . '","' . $_AdDivisions . '","' . $_InterNum . '","' . $_CountryNum . '","' . $_Continents . '","' . $_Update_time . '")';
-//        //die($sql);
         $sql = 'call pr_update_location_info ("' . $_IPAddress . '","' . $_Country . '","' . $_Province . '","' . $_City . '","' . $_Organization . '","' . $_Telecom . '","' . $_Longitude . '","' . $_Latitude . '","' . $_Area1 . '","' . $_Area2 . '","' . $_AdDivisions . '","' . $_InterNum . '","' . $_CountryNum . '","' . $_Continents . '","' . $_Update_time . '",' . $_Curr_interval_update_time . ')';
         $this->db->ReturnDataTable($sql);
-        //die(print_r($result));
-        //return $result[0][0];
     }
+
+    /**
+     * 更新EMAIL威胁信息
+     * @param $_email       Email地址
+     * @param $_domains     域名信息
+     * @param $_references  参考信息
+     * @param $_permalink   永久链接
+     * @param $_upd_time    更新时间
+     * @param $_curr_interval_update_time   更新间隔世界
+     */
+    public function update_email_threat_info($_email,$_domains,$_references,$_permalink,$_upd_time,$_curr_interval_update_time){
+        $sql = 'call pr_update_email_info("' . $_email . '","' . $_domains . '","' . $_references . '","' . $_permalink . '","' . $_upd_time . '",' . $_curr_interval_update_time . ')';
+        $this->db->ReturnDataTable($sql);
+    }
+
 
     /**
      * 通过SQL获取归属地信息
@@ -56,6 +66,15 @@ class Common{
         return $this->db->GetResult($sql);
     }
 
+    /**
+     * 通过SQL获取email威胁信息
+     * @param $_email
+     * @return null
+     */
+    public function get_email_threat_info($_email){
+        $sql = 'SELECT * FROM threat_email WHERE email="' . $_email . '"';
+        return $this->db->GetResult($sql);
+    }
 
 }
 

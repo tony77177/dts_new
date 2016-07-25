@@ -97,9 +97,26 @@ switch ($_GET['flag']) {
         $threat_api_link = $config['threat_info_api'][$threat_option].$threat_info;
 
         /*威胁信息结果获取*/
-//        $result = get_threat_info(json_decode(get_page_info($threat_api_link, '')), $threat_option);
-        $result = (get_page_info($threat_api_link, ''));
+        $result = get_threat_info($threat_api_link, $threat_info, $threat_option, $databaseinfo);
 
+
+        //当查询成功时将数据入库
+        if ($result->response_code == 1) {
+
+            //查询成功，进行入库操作
+            $common->update_email_threat_info($threat_info, $result->domains, $result->references, $result->permalink, date('Y-m-d H:i:s', time()), $curr_interval_update_time);
+
+            //组装单个查询前台显示列表
+            $tmp_data = '<b>Domains：</b>';
+            $tmp_data .= $result->domains;
+            $tmp_data .= '<br><b>References：</b>';
+            $tmp_data .= (($result->references != '') ? $result->references : 'N/A');
+            $tmp_data .= '<br><b>Permalink：</b>';
+            $tmp_data .= (($result->permalink != '') ? $result->permalink : 'N/A');
+
+            //结果赋值
+            $result = $tmp_data;
+        }
 
 
         die($result);

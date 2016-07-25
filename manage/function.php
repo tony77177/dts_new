@@ -51,7 +51,6 @@ function get_location_info($_index, $_api_link,$_token,$_search_info,$_dbinfo){
 
             break;
         case 'ipip_vip':
-            //die($_api_link);
             /**
              * 此处逻辑：
              *      1、先通过数据库查询是否存在相关的数据，如若存在，则可直接返回
@@ -103,32 +102,46 @@ function get_location_info($_index, $_api_link,$_token,$_search_info,$_dbinfo){
 }
 
 
-function get_threat_info($_result_info,$_flag){
-    $result= 'fail';
-    switch ($_flag){
+/**
+ * 查询威胁信息
+ * @param $_api_link        API地址
+ * @param $_search_info     查询信息
+ * @param $_flag            类别查询标志
+ * @param $_dbinfo          数据库信息
+ * @return array|mixed|string
+ */
+function get_threat_info($_api_link, $_search_info, $_flag, $_dbinfo){
+    $result = 'fail';
+    switch ($_flag) {
         case 'email':
-            $tmp_data = '';
-            for ($i = 0; $i < count($_result_info->domains); $i++) {
-                if ($i == 0) {
-//                    $tmp_data = 'domains：' . (($_result_info->domains[$i] != '') ? $_result_info->domains[$i] : 'N/A');
-                    $tmp_data = 'domains：' . $_result_info->domains[$i].',';
-                } else {
-                    $tmp_data .= '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . (($_result_info->domains[0] != '') ? $_result_info->domains[$i] : 'N/A');
+            //处理逻辑：先读库获取，获取失败再利用API获取
+            $common = new Common($_dbinfo);
+            $result_info = $common->get_email_threat_info($_search_info);
+            $tmp_data = array();
+
+            if ($result_info != null) {
+                //组装JSON数据
+                $tmp_data = array(
+                    "response_code" => "1",
+                    "domains" => $result_info['domains'],
+                    "references" => $result_info['references'],
+                    "permalink" => $result_info['permalink']
+                );
+//                $result = json_decode(json_encode($tmp_data));
+            } else {
+                $result_info = json_decode(get_page_info($_api_link, ''));
+                if ($result_info->response_code == '1') {
+                    //组装JSON数据
+                    $tmp_data = array(
+                        "response_code" => "1",
+                        "domains" => implode(',', $result_info->domains),
+                        "references" => implode(',', $result_info->references),
+                        "permalink" => $result_info->permalink
+                    );
                 }
             }
 
-            for ($i = 0; $i < count($_result_info->references); $i++) {
-                if ($i == 0) {
-                    $tmp_data = 'domains：' . (($_result_info->references[$i] != '') ? $_result_info->references[$i] : 'N/A');
-                } else {
-                    $tmp_data = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . (($_result_info->references[0] != '') ? $_result_info->references[$i] : 'N/A');
-                }
-            }
-
-            $tmp_data .= '<br>省会或直辖市：' . (($result->data[1] != '') ? $result->data[1] : 'N/A');
-            $tmp_data .= '<br>地区或城市：' . (($result->data[2] != '') ? $result->data[2] : 'N/A');
-            $tmp_data .= '<br>学校或单位：' . (($result->data[3] != '') ? $result->data[3] : 'N/A');
-            $result = $tmp_data;
+            $result = json_decode(json_encode($tmp_data));
             break;
         default;
             break;

@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: 2016-07-24 15:06:22
+-- Generation Time: 2016-07-25 17:24:43
 -- 服务器版本： 5.6.17
 -- PHP Version: 5.5.12
 
@@ -24,6 +24,65 @@ DELIMITER $$
 --
 -- 存储过程
 --
+CREATE DEFINER=`root`@`localhost` PROCEDURE `pr_update_email_info`(IN `_email` VARCHAR(255), IN `_domains` TEXT, IN `_references` TEXT, IN `_permalink` VARCHAR(255), IN `_upd_time` DATETIME, IN `_Curr_interval_update_time` INT(15))
+BEGIN
+	/*数据是否存在的标志*/
+SET @flag = (
+	SELECT
+		COUNT(*)
+	FROM
+		threat_email
+	WHERE
+		threat_email.email = _email
+);
+
+/*返回数据当前更新时间的unix时间戳*/
+SET @upd_time = (
+	SELECT
+		UNIX_TIMESTAMP(threat_email.upd_time)
+	FROM
+		threat_email
+	WHERE
+		threat_email.email = _email
+);
+
+/*是否更新数据的标志，利用当前时间减去数据更新时间，得到一个Unix时间戳*/
+SET @is_update_flag = UNIX_TIMESTAMP(_upd_time) - @upd_time;
+
+/*判断逻辑：1、如果数据不存在则插入数据；2、如果存在，对比数据更新时间与当前时间是否大于间隔时间值，如果大于，则进行更新*/
+IF @flag = 0 THEN
+	INSERT INTO threat_email (
+		threat_email.email,
+		threat_email.domains,
+		threat_email.references,
+		threat_email.permalink,
+		threat_email.upd_time
+	)
+VALUES
+	(
+		_email,
+		_domains,
+		_references,
+		_permalink,
+		_upd_time
+	);
+
+
+ELSEIF @is_update_flag > _curr_interval_update_time THEN
+	UPDATE threat_email
+SET threat_email.domains = _domains,
+ threat_email.references = _references,
+ threat_email.permalink = _permalink,
+ threat_email.upd_time = _upd_time
+WHERE
+	threat_email.email = _email;
+
+END
+IF;
+
+
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `pr_update_location_info`(IN `IPAddress` VARCHAR(15), IN `Country` VARCHAR(50), IN `Province` VARCHAR(50), IN `City` VARCHAR(80), IN `Organization` VARCHAR(100), IN `Telecom` VARCHAR(50), IN `Longitude` DECIMAL(10,7), IN `Latitude` DECIMAL(10,7), IN `Area1` VARCHAR(50), IN `Area2` VARCHAR(50), IN `AdDivisions` INT(11), IN `InterNum` TINYINT(4), IN `CountryNum` CHAR(4), IN `Continents` CHAR(4), IN `Update_time` DATETIME, IN `Curr_interval_update_time` INT(15))
 BEGIN
 	/*数据是否存在的标志*/
@@ -274,6 +333,29 @@ INSERT INTO `searip` (`IPId`, `IPAddress`, `Country`, `Province`, `City`, `Organ
 (365, '203.208.43.114', '中国', '北京', '北京', '谷歌公司', '电信', '39.9049890', '116.4052850', 'Asia/Shanghai', 'UTC+8', 110000, 86, 'CN', 'AP', '2016-07-23 22:08:43'),
 (366, '61.135.169.121', '中国', '北京', '北京', 'baidu.com', '联通', '39.9049890', '116.4052850', 'Asia/Shanghai', 'UTC+8', 110000, 86, 'CN', 'AP', '2016-07-23 22:14:33'),
 (367, '163.177.178.235', '中国', '广东', '中山', '', '联通', '22.5211130', '113.3823910', 'Asia/Shanghai', 'UTC+8', 442000, 86, 'CN', 'AP', '2016-07-24 07:55:16');
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `threat_email`
+--
+
+CREATE TABLE IF NOT EXISTS `threat_email` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) NOT NULL,
+  `domains` text,
+  `references` text,
+  `permalink` varchar(255) DEFAULT NULL,
+  `upd_time` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=9 ;
+
+--
+-- 转存表中的数据 `threat_email`
+--
+
+INSERT INTO `threat_email` (`id`, `email`, `domains`, `references`, `permalink`, `upd_time`) VALUES
+(8, 'william19770319@yahoo.com', 'aoldaily.com,aunewsonline.com,cnndaily.com,usnewssite.com', '', 'https://www.threatcrowd.org/email.php?email=william19770319@yahoo.com', '2016-07-25 23:24:21');
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

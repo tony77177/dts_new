@@ -169,11 +169,11 @@
                     d.show();
                     dialog.get('result_info').close();
                 } else {
-                    alert((msg));
-//                    dialog.get('result_info').width('auto');
-//                    dialog.get('result_info').title('查询结果');
+//                    alert((msg));
+                    dialog.get('result_info').width('auto');
+                    dialog.get('result_info').title('查询结果');
 //                    dialog.get('result_info').content(Process(msg));
-//                    dialog.get('result_info').content(msg);
+                    dialog.get('result_info').content(msg);
                 }
             });
 

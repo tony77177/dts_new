@@ -114,7 +114,7 @@ $databaseinfo = array(
  *  单位为秒，默认为30天 24*60*60
  *
  */
-$curr_interval_update_time = '86400';
+$curr_interval_update_time = '60';
 
 
 
