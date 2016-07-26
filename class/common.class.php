@@ -73,6 +73,21 @@ class Common{
         $this->db->ReturnDataTable($sql);
     }
 
+
+    /**
+     * 更新ANTIVIRUS威胁信息
+     * @param $_antivirus
+     * @param $_hashes
+     * @param $_references
+     * @param $_permalink
+     * @param $_upd_time
+     * @param $_curr_interval_update_time
+     */
+    public function update_antivirus_threat_info($_antivirus, $_hashes, $_references, $_permalink, $_upd_time, $_curr_interval_update_time){
+        $sql = 'call pr_update_antivirus_info("' . $_antivirus . '","' . $_hashes . '","' . $_references . '","' . $_permalink . '","' . $_upd_time . '",' . $_curr_interval_update_time . ')';
+        $this->db->ReturnDataTable($sql);
+    }
+
     /**
      * 通过SQL获取归属地信息
      * @param $_ip_address
@@ -100,6 +115,17 @@ class Common{
      */
     public function get_domain_threat_info($_domain){
         $sql = 'SELECT * FROM threat_domain WHERE domain="' . $_domain . '"';
+        return $this->db->GetResult($sql);
+    }
+
+
+    /**
+     * 通过SQL查询antivirus威胁信息
+     * @param $_antivirus
+     * @return null
+     */
+    public function get_antivirus_threat_info($_antivirus){
+        $sql = 'SELECT * FROM threat_antivirus WHERE antivirus="' . $_antivirus . '"';
         return $this->db->GetResult($sql);
     }
 

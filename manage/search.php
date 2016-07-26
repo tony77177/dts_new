@@ -135,7 +135,7 @@ switch ($_GET['flag']) {
                     break;
                 case 'domain':
                     //查询成功，进行入库操作
-                    $common->update_domain_threat_info($threat_info, $result->resolutions, $result->hashes, $result->emails, $result->subdomains, $result->references, $result->votes, $result->permalink, date('Y-m-d H:i:s', time()), $curr_interval_update_time);
+                    $common->update_domain_threat_info($threat_info, '', $result->hashes, $result->emails, $result->subdomains, $result->references, $result->votes, $result->permalink, date('Y-m-d H:i:s', time()), $curr_interval_update_time);
 
                     //组装单个查询前台显示列表
                     $tmp_data = '<b>Resolutions：</b>';
@@ -152,6 +152,21 @@ switch ($_GET['flag']) {
                     $tmp_data .= (($result->votes != '') ? $result->votes : 'N/A');
                     $tmp_data .= '<br><b>Permalink：</b>';
                     $tmp_data .= (($result->permalink != '') ? $result->permalink : 'N/A');
+                    break;
+
+                case 'antivirus':
+
+                    //查询成功，进行入库操作
+                    $common->update_antivirus_threat_info($threat_info, $result->hashes, $result->references, $result->permalink, date('Y-m-d H:i:s', time()), $curr_interval_update_time);
+
+                    //组装单个查询前台显示列表
+                    $tmp_data .= '<br><b>Hashes：</b>';
+                    $tmp_data .= (($result->hashes != '') ? $result->hashes : 'N/A');
+                    $tmp_data .= '<br><b>References：</b>';
+                    $tmp_data .= (($result->references != '') ? $result->references : 'N/A');
+                    $tmp_data .= '<br><b>Permalink：</b>';
+                    $tmp_data .= (($result->permalink != '') ? $result->permalink : 'N/A');
+
                     break;
                 default:
                     break;

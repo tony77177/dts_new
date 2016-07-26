@@ -177,6 +177,31 @@ function get_threat_info($_api_link, $_search_info, $_flag, $_dbinfo){
         case 'hash':    //HASH信息查询
             break;
         case 'antivirus':   //antivirus信息查询
+            //处理逻辑：先读库获取，获取失败再利用API获取
+            $common = new Common($_dbinfo);
+            $result_info = $common->get_antivirus_threat_info($_search_info);
+            if ($result_info != null) {
+                //组装JSON数据
+                $tmp_data = array(
+                    "response_code" => "1",
+                    "hashes" => $result_info['hashes'],
+                    "references" => $result_info['references'],
+                    "permalink" => $result_info['permalink']
+                );
+                $result = json_decode(json_encode($tmp_data));
+            } else {
+                $result_info = json_decode(get_page_info($_api_link, ''));
+                if ($result_info->response_code == '1') {
+                    //组装JSON数据
+                    $tmp_data = array(
+                        "response_code" => "1",
+                        "hashes" => implode(',', $result_info->hashes),
+                        "references" => implode(',', $result_info->references),
+                        "permalink" => $result_info->permalink
+                    );
+                    $result = json_decode(json_encode($tmp_data));
+                }
+            }
             break;
         default;
             break;
