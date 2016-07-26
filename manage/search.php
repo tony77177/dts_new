@@ -49,7 +49,7 @@ switch ($_GET['flag']) {
                 }
             }
 
-            die(export_excel($search_info, $result_arr));
+            die(export_location_excel($search_info, $result_arr));
         }
 
         /*API地址拼接*/
@@ -92,6 +92,22 @@ switch ($_GET['flag']) {
     case 'threat_search':
         $threat_option = $_GET['_threat_option'];//获取查询类别
         $threat_info = $_GET['_threat_info'];//获取查询内容
+        $multi_flag = $_GET['multi'];//是否为批量查询标志，1：是批量查询；其他：非批量查询
+
+        /*批量查询操作，组装成批量的API请求并生成对应的excel文档*/
+        if ($multi_flag) {
+            $result_arr = array();//结果数组
+            $threat_info = explode(',',$threat_info);
+
+            for ($i = 0; $i < count($threat_info); $i++) {
+                $result_arr[$i] = get_threat_info($config['threat_info_api'][$threat_option] . $threat_info[$i], $threat_info[$i], $threat_option, $databaseinfo);
+                if ($result_arr[$i]->response_code == '1') {//查询成功时才写库
+                    $common->update_email_threat_info($threat_info[$i], $result_arr[$i]->domains, $result_arr[$i]->references, $result_arr[$i]->permalink, date('Y-m-d H:i:s', time()), $curr_interval_update_time);
+                }
+            }
+
+            die(export_threat_excel($threat_info,$result_arr,$threat_option));
+        }
 
         /*API地址拼接*/
         $threat_api_link = $config['threat_info_api'][$threat_option].$threat_info;
@@ -101,19 +117,45 @@ switch ($_GET['flag']) {
 
 
         //当查询成功时将数据入库
-        if ($result->response_code == 1) {
+        if ($result->response_code == '1') {
 
-            //查询成功，进行入库操作
-            $common->update_email_threat_info($threat_info, $result->domains, $result->references, $result->permalink, date('Y-m-d H:i:s', time()), $curr_interval_update_time);
+            //单个查询前台及入库操作
+            switch ($threat_option) {
+                case 'email':
+                    //查询成功，进行入库操作
+                    $common->update_email_threat_info($threat_info, $result->domains, $result->references, $result->permalink, date('Y-m-d H:i:s', time()), $curr_interval_update_time);
 
-            //组装单个查询前台显示列表
-            $tmp_data = '<b>Domains：</b>';
-            $tmp_data .= $result->domains;
-            $tmp_data .= '<br><b>References：</b>';
-            $tmp_data .= (($result->references != '') ? $result->references : 'N/A');
-            $tmp_data .= '<br><b>Permalink：</b>';
-            $tmp_data .= (($result->permalink != '') ? $result->permalink : 'N/A');
+                    //组装单个查询前台显示列表
+                    $tmp_data = '<b>Domains：</b>';
+                    $tmp_data .= $result->domains;
+                    $tmp_data .= '<br><b>References：</b>';
+                    $tmp_data .= (($result->references != '') ? $result->references : 'N/A');
+                    $tmp_data .= '<br><b>Permalink：</b>';
+                    $tmp_data .= (($result->permalink != '') ? $result->permalink : 'N/A');
+                    break;
+                case 'domain':
+                    //查询成功，进行入库操作
+                    $common->update_domain_threat_info($threat_info, $result->resolutions, $result->hashes, $result->emails, $result->subdomains, $result->references, $result->votes, $result->permalink, date('Y-m-d H:i:s', time()), $curr_interval_update_time);
 
+                    //组装单个查询前台显示列表
+                    $tmp_data = '<b>Resolutions：</b>';
+                    $tmp_data .= unserialize($result->resolutions);//将二维数组反序列化之后进行展示
+                    $tmp_data .= '<br><b>Hashes：</b>';
+                    $tmp_data .= (($result->hashes != '') ? $result->hashes : 'N/A');
+                    $tmp_data .= '<br><b>Emails：</b>';
+                    $tmp_data .= (($result->emails != '') ? $result->emails : 'N/A');
+                    $tmp_data .= '<br><b>Subdomains：</b>';
+                    $tmp_data .= (($result->subdomains != '') ? $result->subdomains : 'N/A');
+                    $tmp_data .= '<br><b>References：</b>';
+                    $tmp_data .= (($result->references != '') ? $result->references : 'N/A');
+                    $tmp_data .= '<br><b>Votes：</b>';
+                    $tmp_data .= (($result->votes != '') ? $result->votes : 'N/A');
+                    $tmp_data .= '<br><b>Permalink：</b>';
+                    $tmp_data .= (($result->permalink != '') ? $result->permalink : 'N/A');
+                    break;
+                default:
+                    break;
+            }
             //结果赋值
             $result = $tmp_data;
         }

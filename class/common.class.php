@@ -55,11 +55,28 @@ class Common{
         $this->db->ReturnDataTable($sql);
     }
 
+    /**
+     * 更新DOMAIN威胁信息
+     * @param $_domain          域名
+     * @param $_resolutions     
+     * @param $_hashes
+     * @param $_emails
+     * @param $_subdomains
+     * @param $_references
+     * @param $_votes
+     * @param $_permalink
+     * @param $_upd_time
+     * @param $_curr_interval_update_time
+     */
+    public function update_domain_threat_info($_domain,$_resolutions,$_hashes,$_emails,$_subdomains,$_references,$_votes,$_permalink,$_upd_time,$_curr_interval_update_time){
+        $sql = 'call pr_update_domain_info("' . $_domain . '","' . $_resolutions . '","' . $_hashes . '","' . $_emails . '","' . $_subdomains . '","' . $_references . '","' . $_votes . '","' . $_permalink . '","' . $_upd_time . '",' . $_curr_interval_update_time . ')';
+        $this->db->ReturnDataTable($sql);
+    }
 
     /**
      * 通过SQL获取归属地信息
      * @param $_ip_address
-     * @return null
+     * @return array
      */
     public function get_location_info($_ip_address){
         $sql = 'SELECT * FROM searip WHERE IPAddress="' . $_ip_address . '"';
@@ -69,10 +86,20 @@ class Common{
     /**
      * 通过SQL获取email威胁信息
      * @param $_email
-     * @return null
+     * @return array
      */
     public function get_email_threat_info($_email){
         $sql = 'SELECT * FROM threat_email WHERE email="' . $_email . '"';
+        return $this->db->GetResult($sql);
+    }
+
+    /**
+     * 通过SQL获取domain威胁信息
+     * @param $_domain
+     * @return array
+     */
+    public function get_domain_threat_info($_domain){
+        $sql = 'SELECT * FROM threat_domain WHERE domain="' . $_domain . '"';
         return $this->db->GetResult($sql);
     }
 

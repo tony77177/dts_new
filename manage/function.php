@@ -113,12 +113,10 @@ function get_location_info($_index, $_api_link,$_token,$_search_info,$_dbinfo){
 function get_threat_info($_api_link, $_search_info, $_flag, $_dbinfo){
     $result = 'fail';
     switch ($_flag) {
-        case 'email':
+        case 'email':   //Email信息查询
             //处理逻辑：先读库获取，获取失败再利用API获取
             $common = new Common($_dbinfo);
             $result_info = $common->get_email_threat_info($_search_info);
-            $tmp_data = array();
-
             if ($result_info != null) {
                 //组装JSON数据
                 $tmp_data = array(
@@ -127,7 +125,7 @@ function get_threat_info($_api_link, $_search_info, $_flag, $_dbinfo){
                     "references" => $result_info['references'],
                     "permalink" => $result_info['permalink']
                 );
-//                $result = json_decode(json_encode($tmp_data));
+                $result = json_decode(json_encode($tmp_data));
             } else {
                 $result_info = json_decode(get_page_info($_api_link, ''));
                 if ($result_info->response_code == '1') {
@@ -138,10 +136,47 @@ function get_threat_info($_api_link, $_search_info, $_flag, $_dbinfo){
                         "references" => implode(',', $result_info->references),
                         "permalink" => $result_info->permalink
                     );
+                    $result = json_decode(json_encode($tmp_data));
                 }
             }
-
-            $result = json_decode(json_encode($tmp_data));
+            break;
+        case 'domain':  //域名信息查询
+            //处理逻辑：先读库获取，获取失败再利用API获取
+            $common = new Common($_dbinfo);
+            $result_info = $common->get_domain_threat_info($_search_info);
+            if ($result_info != null) {
+                //组装JSON数据
+                $tmp_data = array(
+                    "response_code" => "1",
+                    "domains" => $result_info['domains'],
+                    "references" => $result_info['references'],
+                    "permalink" => $result_info['permalink']
+                );
+                $result = json_decode(json_encode($tmp_data));
+            } else {
+                $result_info = json_decode(get_page_info($_api_link, ''));
+                if ($result_info->response_code == '1') {
+                    //组装JSON数据
+                    $a = serialize($result_info->resolutions);
+                    $tmp_data = array(
+                        "response_code" => "1",
+                        "resolutions" => serialize($result_info->resolutions),//利用序列化入库，因为涉及二维数组
+                        "hashes" => implode(',', $result_info->hashes),
+                        "emails" => implode(',', $result_info->emails),
+                        "subdomains" => implode(',', $result_info->subdomains),
+                        "references" => implode(',', $result_info->references),
+                        "votes" => $result_info->votes,
+                        "permalink" => $result_info->permalink
+                    );
+                    $result = json_decode(json_encode($tmp_data));
+                }
+            }
+            break;
+        case 'ip':      //IP地址信息查询
+            break;
+        case 'hash':    //HASH信息查询
+            break;
+        case 'antivirus':   //antivirus信息查询
             break;
         default;
             break;
@@ -185,25 +220,24 @@ function get_page_info($_url, $_token){
 
 
 /**
- * 批量导出查询结果
+ * 批量导出归属地查询结果查询结果
  * @param $_search_info 查询内容
  * @param $_result_info 查询结果
  * @throws PHPExcel_Reader_Exception    输出excel文档
  */
-function export_excel($_search_info,$_result_info){
-
+function export_location_excel($_search_info,$_result_info){
+    //新建Excel类
     $objPHPExcel = new PHPExcel();
     $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
 
-
-// Set document properties
+    // Set document properties
     $objPHPExcel->getProperties()->setCreator("dts")
         ->setLastModifiedBy("dts")
         ->setTitle("Office 2007 XLSX Document")
         ->setSubject("Office 2007 XLSX Document");
 
 
-// 设置标题栏
+    // 设置标题栏
     $objPHPExcel->setActiveSheetIndex(0)
         ->setCellValue('A1', '查询内容')
         ->setCellValue('B1', 'IP地址')
@@ -228,8 +262,7 @@ function export_excel($_search_info,$_result_info){
     $objPHPExcel->setActiveSheetIndex(0)->getStyle('A1:O1')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);////垂直平对齐
     $objPHPExcel->setActiveSheetIndex(0)->getRowDimension(1)->setRowHeight(25);//行高
 
-
-//添加内容
+    //添加内容
     for ($i = 0; $i < count($_search_info); $i++) {
         if($_result_info[$i]->ret=='ok'){
             $objPHPExcel->setActiveSheetIndex(0)
@@ -248,14 +281,12 @@ function export_excel($_search_info,$_result_info){
                 ->setCellValue('M'.($i+2), $_result_info[$i]->data[10])
                 ->setCellValue('N'.($i+2), $_result_info[$i]->data[11])
                 ->setCellValue('O'.($i+2), $_result_info[$i]->data[12]);
-
         }else{
             $objPHPExcel->setActiveSheetIndex(0)
                 ->setCellValue('A'.($i+2), $_search_info[$i])
                 ->setCellValue('B'.($i+2), gethostbyname($_search_info[$i]))
                 ->setCellValue('C'.($i+2), '查询失败，请确认数据正确性');
             $objPHPExcel->setActiveSheetIndex(0)->mergeCells('C' . ($i + 2) . ':O' . (($i + 2)));//合并单元格
-
         }
 
         //设置列宽度
@@ -268,30 +299,109 @@ function export_excel($_search_info,$_result_info){
 
         //设置列垂直居中
         $objPHPExcel->setActiveSheetIndex(0)->getStyle('A' . ($i + 2) . ':O' . ($i + 2))->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-
     }
 
-// Rename worksheet
+    // Rename worksheet
     $objPHPExcel->getActiveSheet()->setTitle('查询结果');
 
-
-// Set active sheet index to the first sheet, so Excel opens this as the first sheet
+    // Set active sheet index to the first sheet, so Excel opens this as the first sheet
     $objPHPExcel->setActiveSheetIndex(0);
 
-
-// Redirect output to a client’s web browser (Excel5)
+    // Redirect output to a client’s web browser (Excel5)
     header('Content-Type: application/vnd.ms-excel');
     header('Content-Disposition: attachment;filename="批量查询结果-'.date("Ymdhis",time()).'.xls"');
     header('Cache-Control: max-age=0');
-// If you're serving to IE 9, then the following may be needed
+    // If you're serving to IE 9, then the following may be needed
     header('Cache-Control: max-age=1');
 
-// If you're serving to IE over SSL, then the following may be needed
+    // If you're serving to IE over SSL, then the following may be needed
     header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
     header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
     header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
     header('Pragma: public'); // HTTP/1.0
 
+    $objWriter->save('php://output');
+}
+
+
+function export_threat_excel($_search_info,$_result_info,$_threat_option){
+    //新建Excel类
+    $objPHPExcel = new PHPExcel();
+    $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+
+    // Set document properties
+    $objPHPExcel->getProperties()->setCreator("dts")
+        ->setLastModifiedBy("dts")
+        ->setTitle("Office 2007 XLSX Document")
+        ->setSubject("Office 2007 XLSX Document");
+
+    switch ($_threat_option) {
+        case 'email':
+            // 设置标题栏
+            $objPHPExcel->setActiveSheetIndex(0)
+                ->setCellValue('A1', '查询内容')
+                ->setCellValue('B1', 'Domains')
+                ->setCellValue('C1', 'References')
+                ->setCellValue('D1', 'Permalink');
+
+            //设置字体加粗、字体大小及垂直居中
+            $objPHPExcel->setActiveSheetIndex(0)->getStyle('A1:D1')->getFont()->setSize(12);
+            $objPHPExcel->setActiveSheetIndex(0)->getStyle('A1:D1')->getFont()->setBold(true);
+            $objPHPExcel->setActiveSheetIndex(0)->getStyle('A1:D1')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);////水平对齐
+            $objPHPExcel->setActiveSheetIndex(0)->getStyle('A1:D1')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);////垂直平对齐
+            $objPHPExcel->setActiveSheetIndex(0)->getRowDimension(1)->setRowHeight(25);//行高
+
+            //添加内容
+            for ($i = 0; $i < count($_search_info); $i++) {
+                if ($_result_info[$i]->response_code == '1') {
+                    $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('A' . ($i + 2), $_search_info[$i])
+                        ->setCellValue('B' . ($i + 2), $_result_info[$i]->domains)
+                        ->setCellValue('C' . ($i + 2), $_result_info[$i]->references)
+                        ->setCellValue('D' . ($i + 2), $_result_info[$i]->permalink);
+                } else {
+                    $objPHPExcel->setActiveSheetIndex(0)
+                        ->setCellValue('A' . ($i + 2), $_search_info[$i])
+                        ->setCellValue('B' . ($i + 2), '查询失败，请确认数据正确性');
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B' . ($i + 2) . ':D' . (($i + 2)));//合并单元格
+                }
+
+                //设置列宽度
+                $objPHPExcel->setActiveSheetIndex(0)->getColumnDimension('A')->setAutoSize(true);
+                $objPHPExcel->setActiveSheetIndex(0)->getColumnDimension('B')->setAutoSize(true);
+                $objPHPExcel->setActiveSheetIndex(0)->getColumnDimension('C')->setAutoSize(true);
+                $objPHPExcel->setActiveSheetIndex(0)->getColumnDimension('D')->setAutoSize(true);
+//                $objPHPExcel->setActiveSheetIndex(0)->getColumnDimension('F')->setWidth(15);
+//                $objPHPExcel->setActiveSheetIndex(0)->getColumnDimension('J')->setWidth(15);
+
+                //设置列垂直居中
+                $objPHPExcel->setActiveSheetIndex(0)->getStyle('A' . ($i + 2) . ':D' . ($i + 2))->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            }
+            break;
+
+        default:
+            break;
+    }
+
+
+    // Rename worksheet
+    $objPHPExcel->getActiveSheet()->setTitle('查询结果');
+
+    // Set active sheet index to the first sheet, so Excel opens this as the first sheet
+    $objPHPExcel->setActiveSheetIndex(0);
+
+    // Redirect output to a client’s web browser (Excel5)
+    header('Content-Type: application/vnd.ms-excel');
+    header('Content-Disposition: attachment;filename="批量查询结果-'.date("Ymdhis",time()).'.xls"');
+    header('Cache-Control: max-age=0');
+    // If you're serving to IE 9, then the following may be needed
+    header('Cache-Control: max-age=1');
+
+    // If you're serving to IE over SSL, then the following may be needed
+    header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+    header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
+    header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+    header('Pragma: public'); // HTTP/1.0
 
     $objWriter->save('php://output');
 }
@@ -367,7 +477,7 @@ function read_excel($_api_index,$_api_link){
     }
     die(var_dump(($result_info)));
 //    die($sheet->getCellByColumnAndRow("A", "2")->getValue());
-    export_excel("A1", $sheet->getCellByColumnAndRow("A", "2")->getValue());
+    export_location_excel("A1", $sheet->getCellByColumnAndRow("A", "2")->getValue());
 }
 
 ?>

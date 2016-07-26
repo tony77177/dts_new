@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 4.1.14
+-- version 4.0.4
 -- http://www.phpmyadmin.net
 --
--- Host: 127.0.0.1
--- Generation Time: 2016-07-25 17:24:43
--- 服务器版本： 5.6.17
--- PHP Version: 5.5.12
+-- 主机: localhost
+-- 生成日期: 2016 年 07 月 26 日 08:52
+-- 服务器版本: 5.6.12-log
+-- PHP 版本: 5.4.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -17,13 +17,86 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8 */;
 
 --
--- Database: `seardb`
+-- 数据库: `seardb`
 --
+CREATE DATABASE IF NOT EXISTS `seardb` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+USE `seardb`;
 
 DELIMITER $$
 --
 -- 存储过程
 --
+CREATE DEFINER=`root`@`localhost` PROCEDURE `pr_update_domain_info`(IN `_domain` VARCHAR(255), IN `_resolutions` TEXT, IN `_hashes` TEXT, IN `_emails` TEXT, IN `_subdomains` TEXT, IN `_references` TEXT, IN `_votes` VARCHAR(10), IN `_permalink` VARCHAR(255), IN `_upd_time` DATETIME, IN `_curr_interval_update_time` INT(15))
+BEGIN
+	/*数据是否存在的标志*/
+SET @flag = (
+	SELECT
+		COUNT(*)
+	FROM
+		threat_domain
+	WHERE
+		threat_domain.domain = _domain
+);
+
+/*返回数据当前更新时间的unix时间戳*/
+SET @upd_time = (
+	SELECT
+		UNIX_TIMESTAMP(threat_domain.upd_time)
+	FROM
+		threat_domain
+	WHERE
+		threat_domain.domain = _domain
+);
+
+/*是否更新数据的标志，利用当前时间减去数据更新时间，得到一个Unix时间戳*/
+SET @is_update_flag = UNIX_TIMESTAMP(_upd_time) - @upd_time;
+
+/*判断逻辑：1、如果数据不存在则插入数据；2、如果存在，对比数据更新时间与当前时间是否大于间隔时间值，如果大于，则进行更新*/
+IF @flag = 0 THEN
+	INSERT INTO threat_domain (
+		threat_domain.domain,
+		threat_domain.resolutions,
+		threat_domain.hashes,
+		threat_domain.emails,
+		threat_domain.subdomains,
+		threat_domain.references,
+		threat_domain.votes,
+		threat_domain.permalink,
+		threat_domain.upd_time
+	)
+VALUES
+	(
+		_domain,     
+		_resolutions,
+		_hashes,     
+		_emails,     
+		_subdomains, 
+		_references, 
+		_votes,      
+		_permalink,  
+		_upd_time    
+	);
+
+
+ELSEIF @is_update_flag > _curr_interval_update_time THEN
+	UPDATE threat_domain
+SET threat_domain.resolutions = _resolutions,
+ threat_domain.hashes = _hashes,
+ threat_domain.emails = _emails,
+ threat_domain.subdomains = _subdomains,
+ threat_domain.references = _references,
+ threat_domain.votes = _votes,
+ threat_domain.permalink = _permalink,
+ threat_domain.upd_time = _upd_time
+WHERE
+	threat_domain.domain = _domain;
+
+END
+IF;
+
+
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `pr_update_email_info`(IN `_email` VARCHAR(255), IN `_domains` TEXT, IN `_references` TEXT, IN `_permalink` VARCHAR(255), IN `_upd_time` DATETIME, IN `_Curr_interval_update_time` INT(15))
 BEGIN
 	/*数据是否存在的标志*/
@@ -267,7 +340,7 @@ CREATE TABLE IF NOT EXISTS `searip` (
   `Update_time` datetime NOT NULL,
   PRIMARY KEY (`IPId`),
   UNIQUE KEY `IPAdress` (`IPAddress`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=368 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=372 ;
 
 --
 -- 转存表中的数据 `searip`
@@ -278,7 +351,6 @@ INSERT INTO `searip` (`IPId`, `IPAddress`, `Country`, `Province`, `City`, `Organ
 (68, '61.135.169.125', '中国', '北京', '北京', 'baidu.com', '联通', '39.9049890', '116.4052850', 'Asia/Shanghai', 'UTC+8', 110000, 86, 'CN', 'AP', '2016-07-23 15:48:47'),
 (69, '118.123.7.189', '中国', '四川', '绵阳', '', '电信', '31.4640200', '104.7417220', 'Asia/Chongqing', 'UTC+8', 510700, 86, 'CN', 'AP', '2016-07-23 15:48:47'),
 (82, '220.250.64.23', '中国', '北京', '北京', '', '联通', '39.9049890', '116.4052850', 'Asia/Shanghai', 'UTC+8', 110000, 86, 'CN', 'AP', '2016-07-23 16:02:58'),
-(83, '1.1.1.1', '测试数据', 'APNIC', '', '', '', '0.0000000', '0.0000000', '', '', 0, 0, '*', '*', '2016-07-23 16:03:15'),
 (85, '113.207.2.68', '中国', '重庆', '重庆', '', '联通', '29.5331550', '106.5049620', 'Asia/Chongqing', 'UTC+8', 500000, 86, 'CN', 'AP', '2016-07-23 16:08:08'),
 (86, '202.108.33.60', '中国', '北京', '北京', '', '联通', '39.9049890', '116.4052850', 'Asia/Shanghai', 'UTC+8', 110000, 86, 'CN', 'AP', '2016-07-23 16:08:08'),
 (87, '123.125.104.197', '中国', '北京', '北京', '', '联通', '39.9049890', '116.4052850', 'Asia/Shanghai', 'UTC+8', 110000, 86, 'CN', 'AP', '2016-07-23 16:08:09'),
@@ -289,7 +361,7 @@ INSERT INTO `searip` (`IPId`, `IPAddress`, `Country`, `Province`, `City`, `Organ
 (93, '219.151.4.98', '中国', '贵州', '贵阳', '', '电信', '26.5783430', '106.7134780', 'Asia/Chongqing', 'UTC+8', 520100, 86, 'CN', 'AP', '2016-07-23 18:42:24'),
 (94, '211.139.0.19', '中国', '贵州', '贵阳', '', '移动', '26.5783430', '106.7134780', 'Asia/Chongqing', 'UTC+8', 520100, 86, 'CN', 'AP', '2016-07-23 18:49:07'),
 (95, '113.207.82.1', '中国', '重庆', '重庆', '', '联通', '29.5331550', '106.5049620', 'Asia/Chongqing', 'UTC+8', 500000, 86, 'CN', 'AP', '2016-07-23 16:08:10'),
-(96, '124.172.221.156', '中国', '广东', '广州', 'gzidc.com', '电信', '23.1251780', '113.2806370', 'Asia/Shanghai', 'UTC+8', 440100, 86, 'CN', 'AP', '2016-07-23 16:08:11'),
+(96, '124.172.221.156', '中国', '广东', '广州', 'gzidc.com', '电信', '23.1251780', '113.2806370', 'Asia/Shanghai', 'UTC+8', 440100, 86, 'CN', 'AP', '2016-07-26 09:44:20'),
 (97, '203.208.39.208', '中国', '北京', '北京', '谷歌公司', '电信', '39.9049890', '116.4052850', 'Asia/Shanghai', 'UTC+8', 110000, 86, 'CN', 'AP', '2016-07-23 16:08:11'),
 (98, '58.251.61.186', '中国', '广东', '深圳', '', '联通', '22.5470000', '114.0859470', 'Asia/Shanghai', 'UTC+8', 440300, 86, 'CN', 'AP', '2016-07-23 16:08:11'),
 (99, '42.62.88.173', '中国', '北京', '北京', 'lenet.com.cn', '电信/联通/移动', '39.9049890', '116.4052850', 'Asia/Shanghai', 'UTC+8', 110000, 86, 'CN', 'AP', '2016-07-23 16:08:11'),
@@ -332,7 +404,31 @@ INSERT INTO `searip` (`IPId`, `IPAddress`, `Country`, `Province`, `City`, `Organ
 (364, '203.208.39.240', '中国', '北京', '北京', '谷歌公司', '电信', '39.9049890', '116.4052850', 'Asia/Shanghai', 'UTC+8', 110000, 86, 'CN', 'AP', '2016-07-23 22:04:16'),
 (365, '203.208.43.114', '中国', '北京', '北京', '谷歌公司', '电信', '39.9049890', '116.4052850', 'Asia/Shanghai', 'UTC+8', 110000, 86, 'CN', 'AP', '2016-07-23 22:08:43'),
 (366, '61.135.169.121', '中国', '北京', '北京', 'baidu.com', '联通', '39.9049890', '116.4052850', 'Asia/Shanghai', 'UTC+8', 110000, 86, 'CN', 'AP', '2016-07-23 22:14:33'),
-(367, '163.177.178.235', '中国', '广东', '中山', '', '联通', '22.5211130', '113.3823910', 'Asia/Shanghai', 'UTC+8', 442000, 86, 'CN', 'AP', '2016-07-24 07:55:16');
+(367, '163.177.178.235', '中国', '广东', '中山', '', '联通', '22.5211130', '113.3823910', 'Asia/Shanghai', 'UTC+8', 442000, 86, 'CN', 'AP', '2016-07-24 07:55:16'),
+(368, '188.40.75.132', '德国', '巴伐利亚州', '法尔肯施泰因', '', 'hetzner.de', '49.0994760', '12.4787300', 'Europe/Berlin', 'UTC+2', 0, 49, 'DE', 'EU', '2016-07-25 10:41:06'),
+(369, '120.198.201.156', '中国', '广东', '深圳', '', '移动', '22.5470000', '114.0859470', 'Asia/Shanghai', 'UTC+8', 440300, 86, 'CN', 'AP', '2016-07-25 12:48:43'),
+(370, '111.13.100.91', '中国', '北京', '北京', '', '移动', '39.9049890', '116.4052850', 'Asia/Shanghai', 'UTC+8', 110000, 86, 'CN', 'AP', '2016-07-25 12:48:43'),
+(371, '219.141.18.58', '中国', '贵州', '贵阳', '', '电信', '26.5783430', '106.7134780', 'Asia/Chongqing', 'UTC+8', 520100, 86, 'CN', 'AP', '2016-07-26 09:44:20');
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `threat_domain`
+--
+
+CREATE TABLE IF NOT EXISTS `threat_domain` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `domain` varchar(255) NOT NULL,
+  `resolutions` text,
+  `hashes` text,
+  `emails` text,
+  `subdomains` text,
+  `references` text,
+  `votes` varchar(10) DEFAULT NULL,
+  `permalink` varchar(255) DEFAULT NULL,
+  `upd_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 
 -- --------------------------------------------------------
 
@@ -348,14 +444,15 @@ CREATE TABLE IF NOT EXISTS `threat_email` (
   `permalink` varchar(255) DEFAULT NULL,
   `upd_time` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=9 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=13 ;
 
 --
 -- 转存表中的数据 `threat_email`
 --
 
 INSERT INTO `threat_email` (`id`, `email`, `domains`, `references`, `permalink`, `upd_time`) VALUES
-(8, 'william19770319@yahoo.com', 'aoldaily.com,aunewsonline.com,cnndaily.com,usnewssite.com', '', 'https://www.threatcrowd.org/email.php?email=william19770319@yahoo.com', '2016-07-25 23:24:21');
+(10, 'william19770319@yahoo.com', 'aoldaily.com,aunewsonline.com,cnndaily.com,usnewssite.com', '', 'https://www.threatcrowd.org/email.php?email=william19770319@yahoo.com', '2016-07-26 09:19:33'),
+(11, 'csg-dnsadmin@cisco.com', 'webex.com,webexconnect.com', '', 'https://www.threatcrowd.org/email.php?email=csg-dnsadmin@cisco.com', '2016-07-26 09:59:02');
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

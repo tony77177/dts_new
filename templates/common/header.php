@@ -30,10 +30,6 @@
     <link href="resource/select2/select2.min.css" rel="stylesheet" />
     <script src="resource/select2/select2.min.js"></script>
 
-    <!-- json format js-->
-    <script src="resource/js/json_format.js"></script>
-
-
 </head>
 
 <body>
