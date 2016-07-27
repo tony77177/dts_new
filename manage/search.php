@@ -96,15 +96,71 @@ switch ($_GET['flag']) {
 
         /*批量查询操作，组装成批量的API请求并生成对应的excel文档*/
         if ($multi_flag) {
+
             $result_arr = array();//结果数组
             $threat_info = explode(',',$threat_info);
 
-            for ($i = 0; $i < count($threat_info); $i++) {
-                $result_arr[$i] = get_threat_info($config['threat_info_api'][$threat_option] . $threat_info[$i], $threat_info[$i], $threat_option, $databaseinfo);
-                if ($result_arr[$i]->response_code == '1') {//查询成功时才写库
-                    $common->update_email_threat_info($threat_info[$i], $result_arr[$i]->domains, $result_arr[$i]->references, $result_arr[$i]->permalink, date('Y-m-d H:i:s', time()), $curr_interval_update_time);
-                }
+            switch ($threat_option) {
+                case 'email':
+                    for ($i = 0; $i < count($threat_info); $i++) {
+                        $result_arr[$i] = get_threat_info($config['threat_info_api'][$threat_option] . $threat_info[$i], $threat_info[$i], $threat_option, $databaseinfo);
+                        if ($result_arr[$i]->response_code == '1') {//查询成功时才写库
+                            $common->update_email_threat_info($threat_info[$i], $result_arr[$i]->domains, $result_arr[$i]->references, $result_arr[$i]->permalink, date('Y-m-d H:i:s', time()), $curr_interval_update_time);
+                        }
+                    }
+                    break;
+                case 'domain':
+                    //查询成功，进行入库操作
+                    $common->update_domain_threat_info($threat_info, '', $result->hashes, $result->emails, $result->subdomains, $result->references, $result->votes, $result->permalink, date('Y-m-d H:i:s', time()), $curr_interval_update_time);
+
+                    //组装单个查询前台显示列表
+                    $tmp_data = '<b>Resolutions：</b>';
+                    $tmp_data .= unserialize($result->resolutions);//将二维数组反序列化之后进行展示
+                    $tmp_data .= '<br><b>Hashes：</b>';
+                    $tmp_data .= (($result->hashes != '') ? $result->hashes : 'N/A');
+                    $tmp_data .= '<br><b>Emails：</b>';
+                    $tmp_data .= (($result->emails != '') ? $result->emails : 'N/A');
+                    $tmp_data .= '<br><b>Subdomains：</b>';
+                    $tmp_data .= (($result->subdomains != '') ? $result->subdomains : 'N/A');
+                    $tmp_data .= '<br><b>References：</b>';
+                    $tmp_data .= (($result->references != '') ? $result->references : 'N/A');
+                    $tmp_data .= '<br><b>Votes：</b>';
+                    $tmp_data .= (($result->votes != '') ? $result->votes : 'N/A');
+                    $tmp_data .= '<br><b>Permalink：</b>';
+                    $tmp_data .= (($result->permalink != '') ? $result->permalink : 'N/A');
+
+                    break;
+
+                case 'ip':
+
+                    break;
+
+                case 'hash':
+
+                    for ($i = 0; $i < count($threat_info); $i++) {
+                        $result_arr[$i] = get_threat_info($config['threat_info_api'][$threat_option] . $threat_info[$i], $threat_info[$i], $threat_option, $databaseinfo);
+                        if ($result_arr[$i]->response_code == '1') {//查询成功时才写库
+                            $common->update_hash_threat_info($threat_info[$i], $result_arr[$i]->md5, $result_arr[$i]->sha1, $result_arr[$i]->scans, $result_arr[$i]->ips, $result_arr[$i]->domains, $result_arr[$i]->references, $result_arr[$i]->permalink, date('Y-m-d H:i:s', time()), $curr_interval_update_time);
+                        }
+                    }
+
+                    break;
+
+                case 'antivirus':
+                    for ($i = 0; $i < count($threat_info); $i++) {
+                        $result_arr[$i] = get_threat_info($config['threat_info_api'][$threat_option] . $threat_info[$i], $threat_info[$i], $threat_option, $databaseinfo);
+                        if ($result_arr[$i]->response_code == '1') {//查询成功时才写库
+                            $common->update_antivirus_threat_info($threat_info[$i], $result_arr[$i]->hashes, $result_arr[$i]->references, $result_arr[$i]->permalink, date('Y-m-d H:i:s', time()), $curr_interval_update_time);
+                        }
+                    }
+                    break;
+                default:
+                    break;
             }
+
+
+
+
 
             die(export_threat_excel($threat_info,$result_arr,$threat_option));
         }
@@ -152,6 +208,34 @@ switch ($_GET['flag']) {
                     $tmp_data .= (($result->votes != '') ? $result->votes : 'N/A');
                     $tmp_data .= '<br><b>Permalink：</b>';
                     $tmp_data .= (($result->permalink != '') ? $result->permalink : 'N/A');
+
+                    break;
+
+                case 'ip':
+
+                    break;
+
+                case 'hash':
+
+                    //查询成功，进行入库操作
+                    $common->update_hash_threat_info($threat_info, $result->md5, $result->sha1, $result->scans, $result->ips, $result->domains, $result->references, $result->permalink, date('Y-m-d H:i:s', time()), $curr_interval_update_time);
+
+                    //组装单个查询前台显示列表
+                    $tmp_data = '<br><b>Md5：</b>';
+                    $tmp_data .= (($result->md5 != '') ? $result->md5 : 'N/A');
+                    $tmp_data .= '<br><b>Sha1：</b>';
+                    $tmp_data .= (($result->sha1 != '') ? $result->sha1 : 'N/A');
+                    $tmp_data .= '<br><b>Scans：</b>';
+                    $tmp_data .= (($result->scans != '') ? $result->scans : 'N/A');
+                    $tmp_data .= '<br><b>Ips：</b>';
+                    $tmp_data .= (($result->ips != '') ? $result->ips : 'N/A');
+                    $tmp_data .= '<br><b>Domains：</b>';
+                    $tmp_data .= (($result->domains != '') ? $result->domains : 'N/A');
+                    $tmp_data .= '<br><b>References：</b>';
+                    $tmp_data .= (($result->references != '') ? $result->references : 'N/A');
+                    $tmp_data .= '<br><b>Permalink：</b>';
+                    $tmp_data .= (($result->permalink != '') ? $result->permalink : 'N/A');
+
                     break;
 
                 case 'antivirus':
@@ -160,7 +244,7 @@ switch ($_GET['flag']) {
                     $common->update_antivirus_threat_info($threat_info, $result->hashes, $result->references, $result->permalink, date('Y-m-d H:i:s', time()), $curr_interval_update_time);
 
                     //组装单个查询前台显示列表
-                    $tmp_data .= '<br><b>Hashes：</b>';
+                    $tmp_data = '<br><b>Hashes：</b>';
                     $tmp_data .= (($result->hashes != '') ? $result->hashes : 'N/A');
                     $tmp_data .= '<br><b>References：</b>';
                     $tmp_data .= (($result->references != '') ? $result->references : 'N/A');

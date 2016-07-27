@@ -88,6 +88,25 @@ class Common{
         $this->db->ReturnDataTable($sql);
     }
 
+
+    /**
+     * 更新HASH威胁信息
+     * @param $_hash
+     * @param $_md5
+     * @param $_sha1
+     * @param $_scans
+     * @param $_ips
+     * @param $_domains
+     * @param $_references
+     * @param $_permalink
+     * @param $_upd_time
+     * @param $_curr_interval_update_time
+     */
+    public function update_hash_threat_info($_hash, $_md5, $_sha1, $_scans, $_ips, $_domains, $_references, $_permalink, $_upd_time, $_curr_interval_update_time){
+        $sql = 'call pr_update_hash_info("' . $_hash . '","' . $_md5 . '","' . $_sha1 . '","' . $_scans . '","' . $_ips . '","' . $_domains . '","' . $_references . '","' . $_permalink . '","' . $_upd_time . '",' . $_curr_interval_update_time . ')';
+        $this->db->ReturnDataTable($sql);
+    }
+
     /**
      * 通过SQL获取归属地信息
      * @param $_ip_address
@@ -126,6 +145,16 @@ class Common{
      */
     public function get_antivirus_threat_info($_antivirus){
         $sql = 'SELECT * FROM threat_antivirus WHERE antivirus="' . $_antivirus . '"';
+        return $this->db->GetResult($sql);
+    }
+
+    /**
+     * 通过SQL查询hash威胁信息
+     * @param $_hash
+     * @return null
+     */
+    public function get_hash_threat_info($_hash){
+        $sql = 'SELECT * FROM threat_hash WHERE hash="' . $_hash . '"';
         return $this->db->GetResult($sql);
     }
 

@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <title><?php echo $config['cur_sys_title'];?> V1.0</title>
+    <title><?php echo $config['cur_sys_title'];?></title>
     <meta charset="utf-8">
 
     <!-- Bootstrap CSS -->
     <link href="resource/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
-<!--    <link href="http://v3.bootcss.com/examples/cover/cover.css" rel="stylesheet" type="text/css">-->
-
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->

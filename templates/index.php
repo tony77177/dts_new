@@ -156,7 +156,6 @@
             //批量操作
             if (tmp.length > 1) {
                 url = 'manage/search.php?flag=threat_search&multi=1&_threat_option=' + threat_option + '&_threat_info=' + tmp;
-                alert(url);
                 download_file(url);
                 dialog.get('result_info').close();
                 return;
