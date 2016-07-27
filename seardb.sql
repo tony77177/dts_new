@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: 2016-07-26 17:02:47
+-- Generation Time: 2016-07-27 17:14:13
 -- 服务器版本： 5.6.17
 -- PHP Version: 5.5.12
 
@@ -83,7 +83,7 @@ IF;
 
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `pr_update_domain_info`(IN `_domain` VARCHAR(255), IN `_resolutions` TEXT, IN `_hashes` TEXT, IN `_emails` TEXT, IN `_subdomains` TEXT, IN `_references` TEXT, IN `_votes` VARCHAR(10), IN `_permalink` VARCHAR(255), IN `_upd_time` DATETIME, IN `_curr_interval_update_time` INT(15))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `pr_update_domain_info`(IN `_domain` VARCHAR(255), IN `_last_resolved` TEXT, IN `_ip_address` TEXT, IN `_hashes` TEXT, IN `_emails` TEXT, IN `_subdomains` TEXT, IN `_references` TEXT, IN `_votes` VARCHAR(10), IN `_permalink` VARCHAR(255), IN `_upd_time` DATETIME, IN `_curr_interval_update_time` INT(15))
 BEGIN
 	/*数据是否存在的标志*/
 SET @flag = (
@@ -112,7 +112,8 @@ SET @is_update_flag = UNIX_TIMESTAMP(_upd_time) - @upd_time;
 IF @flag = 0 THEN
 	INSERT INTO threat_domain (
 		threat_domain.domain,
-		threat_domain.resolutions,
+		threat_domain.last_resolved,
+		threat_domain.ip_address,
 		threat_domain.hashes,
 		threat_domain.emails,
 		threat_domain.subdomains,
@@ -124,7 +125,8 @@ IF @flag = 0 THEN
 VALUES
 	(
 		_domain,     
-		_resolutions,
+		_last_resolved,
+		_ip_address,
 		_hashes,     
 		_emails,     
 		_subdomains, 
@@ -137,7 +139,8 @@ VALUES
 
 ELSEIF @is_update_flag > _curr_interval_update_time THEN
 	UPDATE threat_domain
-SET threat_domain.resolutions = _resolutions,
+SET threat_domain.last_resolved = _last_resolved,
+ threat_domain.ip_address = _ip_address,
  threat_domain.hashes = _hashes,
  threat_domain.emails = _emails,
  threat_domain.subdomains = _subdomains,
@@ -284,7 +287,7 @@ IF;
 
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `pr_update_ip_info`(IN `_ip_address` VARCHAR(255), IN `_resolutions` TEXT, IN `_hashes` TEXT,IN `_references` TEXT, IN `_votes` VARCHAR(10), IN `_permalink` VARCHAR(255), IN `_upd_time` DATETIME, IN `_curr_interval_update_time` INT(15))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `pr_update_ip_info`(IN `_ip_address` VARCHAR(255), IN `_last_resolved` TEXT, IN `_domain` TEXT, IN `_hashes` TEXT,IN `_references` TEXT, IN `_votes` VARCHAR(10), IN `_permalink` VARCHAR(255), IN `_upd_time` DATETIME, IN `_curr_interval_update_time` INT(15))
 BEGIN
 	/*数据是否存在的标志*/
 SET @flag = (
@@ -313,7 +316,8 @@ SET @is_update_flag = UNIX_TIMESTAMP(_upd_time) - @upd_time;
 IF @flag = 0 THEN
 	INSERT INTO threat_ip (
 		threat_ip.ip_address,
-		threat_ip.resolutions,
+		threat_ip.last_resolved,
+		threat_ip.domain,
 		threat_ip.hashes,
 		threat_ip.references,
 		threat_ip.votes,
@@ -323,7 +327,8 @@ IF @flag = 0 THEN
 VALUES
 	(
 		_ip_address,     
-		_resolutions,
+		_last_resolved,
+		_domain,
 		_hashes,     
 		_references,     
 		_votes, 
@@ -334,7 +339,8 @@ VALUES
 
 ELSEIF @is_update_flag > _curr_interval_update_time THEN
 	UPDATE threat_ip
-SET threat_ip.resolutions = _resolutions,
+SET threat_ip.last_resolved = _last_resolved,
+ threat_ip.domain = _domain,
  threat_ip.hashes = _hashes,
  threat_ip.references = _references,
  threat_ip.votes = _votes,
@@ -356,19 +362,19 @@ SET @flag = (
 	SELECT
 		COUNT(*)
 	FROM
-		searip
+		location_info
 	WHERE
-		searip.IPAddress = IPAddress
+		location_info.IPAddress = IPAddress
 );
 
 /*返回数据当前更新时间的unix时间戳*/
 SET @upd_time = (
 	SELECT
-		UNIX_TIMESTAMP(searip.Update_time)
+		UNIX_TIMESTAMP(location_info.Update_time)
 	FROM
-		searip
+		location_info
 	WHERE
-		searip.IPAddress = IPAddress
+		location_info.IPAddress = IPAddress
 );
 
 /*是否更新数据的标志，利用当前时间减去数据更新时间，得到一个Unix时间戳*/
@@ -376,22 +382,22 @@ SET @is_update_flag = UNIX_TIMESTAMP(Update_time) - @upd_time;
 
 /*判断逻辑：1、如果数据不存在则插入数据；2、如果存在，对比数据更新时间与当前时间是否大于间隔时间值，如果大于，则进行更新*/
 IF @flag = 0 THEN
-	INSERT INTO searip (
-		searip.IPAddress,
-		searip.Country,
-		searip.Province,
-		searip.City,
-		searip.Organization,
-		searip.Telecom,
-		searip.Longitude,
-		searip.Latitude,
-		searip.Area1,
-		searip.Area2,
-		searip.AdDivisions,
-		searip.InterNum,
-		searip.CountryNum,
-		searip.Continents,
-		searip.Update_time
+	INSERT INTO location_info (
+		location_info.IPAddress,
+		location_info.Country,
+		location_info.Province,
+		location_info.City,
+		location_info.Organization,
+		location_info.Telecom,
+		location_info.Longitude,
+		location_info.Latitude,
+		location_info.Area1,
+		location_info.Area2,
+		location_info.AdDivisions,
+		location_info.InterNum,
+		location_info.CountryNum,
+		location_info.Continents,
+		location_info.Update_time
 	)
 VALUES
 	(
@@ -414,23 +420,23 @@ VALUES
 
 
 ELSEIF @is_update_flag > Curr_interval_update_time THEN
-	UPDATE searip
-SET searip.Country = Country,
- searip.Province = Province,
- searip.City = City,
- searip.Organization = Organization,
- searip.Telecom = Telecom,
- searip.Longitude = Longitude,
- searip.Latitude = Latitude,
- searip.Area1 = Area1,
- searip.Area2 = Area2,
- searip.AdDivisions = AdDivisions,
- searip.InterNum = InterNum,
- searip.CountryNum = CountryNum,
- searip.Continents = Continents,
- searip.Update_time = Update_time
+	UPDATE location_info
+SET location_info.Country = Country,
+ location_info.Province = Province,
+ location_info.City = City,
+ location_info.Organization = Organization,
+ location_info.Telecom = Telecom,
+ location_info.Longitude = Longitude,
+ location_info.Latitude = Latitude,
+ location_info.Area1 = Area1,
+ location_info.Area2 = Area2,
+ location_info.AdDivisions = AdDivisions,
+ location_info.InterNum = InterNum,
+ location_info.CountryNum = CountryNum,
+ location_info.Continents = Continents,
+ location_info.Update_time = Update_time
 WHERE
-	searip.IPAddress = IPAddress;
+	location_info.IPAddress = IPAddress;
 
 
 END
@@ -444,10 +450,10 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
--- 表的结构 `searip`
+-- 表的结构 `location_info`
 --
 
-CREATE TABLE IF NOT EXISTS `searip` (
+CREATE TABLE IF NOT EXISTS `location_info` (
   `IPId` int(11) NOT NULL AUTO_INCREMENT,
   `IPAddress` varchar(15) NOT NULL,
   `Country` varchar(50) DEFAULT NULL,
@@ -466,14 +472,14 @@ CREATE TABLE IF NOT EXISTS `searip` (
   `Update_time` datetime NOT NULL,
   PRIMARY KEY (`IPId`),
   UNIQUE KEY `IPAdress` (`IPAddress`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=368 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=370 ;
 
 --
--- 转存表中的数据 `searip`
+-- 转存表中的数据 `location_info`
 --
 
-INSERT INTO `searip` (`IPId`, `IPAddress`, `Country`, `Province`, `City`, `Organization`, `Telecom`, `Longitude`, `Latitude`, `Area1`, `Area2`, `AdDivisions`, `InterNum`, `CountryNum`, `Continents`, `Update_time`) VALUES
-(67, '112.90.83.112', '中国', '广东', '深圳', '', '联通', '22.5470000', '114.0859470', 'Asia/Shanghai', 'UTC+8', 440300, 86, 'CN', 'AP', '2016-07-23 15:48:46'),
+INSERT INTO `location_info` (`IPId`, `IPAddress`, `Country`, `Province`, `City`, `Organization`, `Telecom`, `Longitude`, `Latitude`, `Area1`, `Area2`, `AdDivisions`, `InterNum`, `CountryNum`, `Continents`, `Update_time`) VALUES
+(67, '112.90.83.112', '中国', '广东', '深圳', '', '联通', '22.5470000', '114.0859470', 'Asia/Shanghai', 'UTC+8', 440300, 86, 'CN', 'AP', '2016-07-27 23:07:52'),
 (68, '61.135.169.125', '中国', '北京', '北京', 'baidu.com', '联通', '39.9049890', '116.4052850', 'Asia/Shanghai', 'UTC+8', 110000, 86, 'CN', 'AP', '2016-07-23 15:48:47'),
 (69, '118.123.7.189', '中国', '四川', '绵阳', '', '电信', '31.4640200', '104.7417220', 'Asia/Chongqing', 'UTC+8', 510700, 86, 'CN', 'AP', '2016-07-23 15:48:47'),
 (82, '220.250.64.23', '中国', '北京', '北京', '', '联通', '39.9049890', '116.4052850', 'Asia/Shanghai', 'UTC+8', 110000, 86, 'CN', 'AP', '2016-07-23 16:02:58'),
@@ -531,7 +537,9 @@ INSERT INTO `searip` (`IPId`, `IPAddress`, `Country`, `Province`, `City`, `Organ
 (364, '203.208.39.240', '中国', '北京', '北京', '谷歌公司', '电信', '39.9049890', '116.4052850', 'Asia/Shanghai', 'UTC+8', 110000, 86, 'CN', 'AP', '2016-07-23 22:04:16'),
 (365, '203.208.43.114', '中国', '北京', '北京', '谷歌公司', '电信', '39.9049890', '116.4052850', 'Asia/Shanghai', 'UTC+8', 110000, 86, 'CN', 'AP', '2016-07-23 22:08:43'),
 (366, '61.135.169.121', '中国', '北京', '北京', 'baidu.com', '联通', '39.9049890', '116.4052850', 'Asia/Shanghai', 'UTC+8', 110000, 86, 'CN', 'AP', '2016-07-23 22:14:33'),
-(367, '163.177.178.235', '中国', '广东', '中山', '', '联通', '22.5211130', '113.3823910', 'Asia/Shanghai', 'UTC+8', 442000, 86, 'CN', 'AP', '2016-07-24 07:55:16');
+(367, '163.177.178.235', '中国', '广东', '中山', '', '联通', '22.5211130', '113.3823910', 'Asia/Shanghai', 'UTC+8', 442000, 86, 'CN', 'AP', '2016-07-24 07:55:16'),
+(368, '188.40.75.132', '德国', '巴伐利亚州', '法尔肯施泰因', '', 'hetzner.de', '49.0994760', '12.4787300', 'Europe/Berlin', 'UTC+2', 0, 49, 'DE', 'EU', '2016-07-27 22:39:29'),
+(369, '69.195.129.72', '美国', '密苏里州', '堪萨斯城', '', 'joesdatacenter.com', '39.0919190', '-94.5757190', 'America/Chicago', 'UTC-5', 0, 1, 'US', 'NA', '2016-07-27 22:39:30');
 
 -- --------------------------------------------------------
 
@@ -565,7 +573,8 @@ INSERT INTO `threat_antivirus` (`id`, `antivirus`, `hashes`, `references`, `perm
 CREATE TABLE IF NOT EXISTS `threat_domain` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `domain` varchar(255) NOT NULL,
-  `resolutions` text,
+  `last_resolved` text NOT NULL,
+  `ip_address` text NOT NULL,
   `hashes` text,
   `emails` text,
   `subdomains` text,
@@ -574,14 +583,15 @@ CREATE TABLE IF NOT EXISTS `threat_domain` (
   `permalink` varchar(255) DEFAULT NULL,
   `upd_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=3 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=6 ;
 
 --
 -- 转存表中的数据 `threat_domain`
 --
 
-INSERT INTO `threat_domain` (`id`, `domain`, `resolutions`, `hashes`, `emails`, `subdomains`, `references`, `votes`, `permalink`, `upd_time`) VALUES
-(2, 'aoldaily.com', '', '', 'domains@virustracker.info,william19770319@yahoo.com', 'media.aoldaily.com,e.aoldaily.com,finance.aoldaily.com,game.aoldaily.com,zone.aoldaily.com,share.aoldaily.com,update.aoldaily.com,flash.aoldaily.com,mail.aoldaily.com,webmail.aoldaily.com,email.aoldaily.com,info.aoldaily.com,auto.aoldaily.com,pop.aoldaily.com,ftp.aoldaily.com,smtp.aoldaily.com,ks.aoldaily.com,stratos.aoldaily.com,documents.aoldaily.com,sports.aoldaily.com,news.aoldaily.com,www.aoldaily.com', 'http://blog.shadowserver.org/2013/02/,http://sto-strategy.com/s/Appendix-D-Digital-FQDNs.pdf', '-1', 'https://www.threatcrowd.org/domain.php?domain=aoldaily.com', '2016-07-26 22:08:06');
+INSERT INTO `threat_domain` (`id`, `domain`, `last_resolved`, `ip_address`, `hashes`, `emails`, `subdomains`, `references`, `votes`, `permalink`, `upd_time`) VALUES
+(4, 'facebook.controlliamo.com', '2016-07-19,2014-12-08,2015-02-01', '-,31.13.93.3,59.13.211.148', '31d0e421894004393c48de1769744687', '', '', '', '-1', 'https://www.threatcrowd.org/domain.php?domain=facebook.controlliamo.com', '2016-07-27 21:57:55'),
+(5, 'aoldaily.com', '2016-03-14,2014-04-01,2013-09-03,2013-09-20,0000-00-00,2015-05-12,2016-07-27,2013-12-02', '-,0.0.0.0,50.116.42.33,50.63.202.70,66.228.48.134,69.195.129.70,69.195.129.72,81.166.122.234', '', 'domains@virustracker.info,william19770319@yahoo.com', 'media.aoldaily.com,e.aoldaily.com,finance.aoldaily.com,game.aoldaily.com,zone.aoldaily.com,share.aoldaily.com,update.aoldaily.com,flash.aoldaily.com,mail.aoldaily.com,webmail.aoldaily.com,email.aoldaily.com,info.aoldaily.com,auto.aoldaily.com,pop.aoldaily.com,ftp.aoldaily.com,smtp.aoldaily.com,ks.aoldaily.com,stratos.aoldaily.com,documents.aoldaily.com,sports.aoldaily.com,news.aoldaily.com,www.aoldaily.com', 'http://blog.shadowserver.org/2013/02/,http://sto-strategy.com/s/Appendix-D-Digital-FQDNs.pdf', '-1', 'https://www.threatcrowd.org/domain.php?domain=aoldaily.com', '2016-07-27 21:57:55');
 
 -- --------------------------------------------------------
 
@@ -635,14 +645,23 @@ CREATE TABLE IF NOT EXISTS `threat_hash` (
 CREATE TABLE IF NOT EXISTS `threat_ip` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `ip_address` varchar(255) NOT NULL,
-  `resolutions` text,
+  `last_resolved` text NOT NULL,
+  `domain` text NOT NULL,
   `hashes` text,
   `references` text,
   `votes` varchar(10) NOT NULL,
   `permalink` varchar(255) NOT NULL,
   `upd_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=4 ;
+
+--
+-- 转存表中的数据 `threat_ip`
+--
+
+INSERT INTO `threat_ip` (`id`, `ip_address`, `last_resolved`, `domain`, `hashes`, `references`, `votes`, `permalink`, `upd_time`) VALUES
+(2, '188.40.75.132', '2015-02-17,2015-02-17,2015-02-17,2015-02-17,2015-02-17,2015-02-17,2015-02-17,2015-02-17,2015-02-17,2015-02-17,2014-02-14,2014-05-27,2015-02-19,2014-03-22,2014-06-08,2014-08-22,2014-11-07,2015-09-21,2015-09-28,2016-07-18,2016-07-24', 'tvgate.rocks,nice-mobiles.com,nauss-lab.com,iwork-sys.com,linkedim.in,fpupdate.info,ineltdriver.com,flushupdate.com,flushupate.com,ahmedfaiez.info,advtravel.info,nartu.de,www.fpupdate.info,advtravel.info\r,ahmedfaiez.info\r,flushupate.com\r,ineltdriver.com\r,gbartu.de,vartu.de,NS2.ATYAFHOSTING.INFO,ns1.atyafhosting.info', '003f0ed24b5f70ddc7c6e80f9c4dac73,027fc90c13f6d87e1f68d25b0d0ec4a7,088420b7e56c73d3d495230d42e0cb95,1e52a293838464e4cd6c1c6d94a55793,2219f3941603262dc3478c60df3b02f6,238b48338c14c8ea87ff7ccab4544252,2607abe604832363514eb58c33a682fc,2986d9af413cd09d9ffdb40040e5c180,2b3baed817a79109824d3a8a94f6c317,2bce2ccd484a063e5e432a6f651782d9,4377b17d7984838993b998c4bab97925,4907a68a3ff0f010ed74214f957746c0,63c480b1cc601b02b4acb30309b007e6,686779709226c6727bd9ebc4b1ff21b1,6b4248a01a26ff07a85b5316702a2f5f,7075c9a874ab5b0c27942714394f3885,73c46bacc471db08a6c0e31caef3f9e8,74d8b882efae9fea1787f1558589fecb,76f74b24480bc1a42998c9440ddc2fad,7ac102b740b299824e34394f334b5508,7ed79032a1ad8535242428e69507ca0a,8a9b52ff90bbd585907694e68551b991,8bbad466f2257e05f66ece621ccf2056,9469ff12c582cf7943582dd28a1920cc,a0b76ea08917a9dd785a0a1a6ae6eebe,a4a390f90be49b2bb51194d0844fed7f,a59399c7608d140dc9cb5dffcb46f1d9,aefea9d795624da16d878dc9bb81bf87,b08a67892d2198aeb2826b398f8c6c74,bd54d70d473d45b75cc8bf1fbe6fa022,d048a6a8377a865f07cbc2429ffaa3e7,dff746868a1559de9d25037e73c06c52,e1d2543aba350a83c968872fbe957d85,f3d6bb7addc88ad45f79c5199f8db2e0,f78fcd4eaf3d9cd95116b6e6212ad327,fa6fbd1dd2d58885772bd0b37633d5d7', '', '-1', 'https://www.threatcrowd.org/ip.php?ip=188.40.75.132', '2016-07-27 22:32:48'),
+(3, '69.195.129.72', '2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13,2014-12-13', 'addr.nifty-login.com,an.pbfsnet.com,arsaic.pbfsnet.com,bae.pbfsnet.com,bbs.pbfsnet.com,blog.pbfsnet.com,bs.pbfsnet.com,can.pbfsnet.com,cars.pbfsnet.com,clifflog.pbfsnet.com,db.pbfsnet.com,gzsc.pbfsnet.com,hu.jeepworker.com,info.pbfsnet.com,itt.pbfsnet.com,jdtt.pbfsnet.com,juju.pbfsnet.com,just2.pbfsnet.com,living.pbfsnet.com,mail.foxypredators.com,mail.jeepworker.com,mail.pbfsnet.com,mail.travelexpolorer.com,mailsrv.pbfsnet.com,my-net.pbfsnet.com,mynet.pbfsnet.com,new-soho.pbfsnet.com,new.pbfsnet.com,ninjia.pbfsnet.com,nowf.pbfsnet.com,oct.pbfsnet.com,para.pbfsnet.com,pbfsnet.com,pbfsnet.pbfsnet.com,prettywidow.pbfsnet.com,reccheck.pbfsnet.com,rember.pbfsnet.com,rukie.pbfsnet.com,sbae.pbfsnet.com,search.nifty-login.com,selex.pbfsnet.com,server.nifty-login.com,sin.pbfsnet.com,slrouji.pbfsnet.com,smtp.travelexpolorer.com,supperrr.pbfsnet.com,tech.pbfsnet.com,themmdance.pbfsnet.com,thgjb.pbfsnet.com,updates.pbfsnet.com', ',0155738045b331f44d300f4a7d08cf21,02d6519b0330a34b72290845e7ed16ab,0d5956dac2ac56f292ee8fa121450973,0fcb4ffe2eb391421ec876286c9ddb6c,11504971bb85cdacb8ef7d45e6e2aeb7,151115ddf1cd4b474a9106cfebcb82e4,19ba802c49895d010e8499e9740b9e8b,2102a18dc20dc6654c03e0e74f36033f,2111622fe5d058ec14e3081c039de739,217d8e8be955136b4fd9215cb3e1bdf0,2fcf134008b8bd0eca20c73692e486b2,3403f7a37d0250fef4fd457c52ce2dde,3459bc37967480dee405a5ac678b942d,37ddd3d72ead03c7518f5d47650c8572,38e8421ec8ccb06a9e5aafa550e2b669,435991e0c67f0c0b4504355b6d4493f0,45ed5d42ffb87aba95b17b48b4225a75,57e79f7df13c0cb01910d0c688fcd296,66d6bfa67e90c97d8486b68321fbc55e,7071242821d43e86e640902c735c7559,71a0d1718a24c14917d25cb8699470a2,7708c23332ee541b0c4b748abc4a1af7,828489e2f1334bf3e27b3aad39cd5b00,89ec3461ef4a893428c32f89de78b396,9218d5c27ffa1c7dabad832154d475ff,9606a63428f0c065a70cf9a91728bdf8,9a22932f46d0d55189b169fa30f1d8e8,9ac6e3de69e75190862a94c94c193d2c,a131d12bc9ab7983b984c81e5e7e108e,a6f55037cb02911c5624e70a67704156,aa3786de7ba4505afba87703c30e0e5b,ab887f60040df29c23de4e0ff2dc2213,b1ee00cec6c2318fa86f320dd7fc99a8,bab8ca687e80a3831bb382147ab9c471,bb4e5ec34608d02e2d9b90ca23e19df3,c021555eb7417b7d72f8fd4616645b16,c4c638750526e28f68d6d71fd1266bdf,d0f4f1e80c6982a1c57336b9404469ed,d220679433b2a319683cb184635e7556,d22863c5e6f098a4b52688b021beef0a,d93026b1c6c828d0905a0868e4cbc55f,dc9ec51a3d9732a7b6aff31b4ce8a282,f1322bd54a4e68c8026e7ce06f3040d8,f237843c03484a31197efb2aec3d5bd9,f475c6cc431785742bbcc1b10205dc89,f60ca07853e335e2d90351b17a0e8ec3,f6cf9c71ecb5b10e595b076b0ea9178d,fda0320d1e28bc022e4d9e9aae544db4,fe82d8178345ea53fa66fd7253cf7dc0', '', '-1', 'https://www.threatcrowd.org/ip.php?ip=69.195.129.72', '2016-07-27 22:32:49');
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

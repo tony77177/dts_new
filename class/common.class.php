@@ -58,7 +58,8 @@ class Common{
     /**
      * 更新DOMAIN威胁信息
      * @param $_domain          域名
-     * @param $_resolutions     
+     * @param $_last_resolved
+     * @param $_ip_address
      * @param $_hashes
      * @param $_emails
      * @param $_subdomains
@@ -68,11 +69,27 @@ class Common{
      * @param $_upd_time
      * @param $_curr_interval_update_time
      */
-    public function update_domain_threat_info($_domain,$_resolutions,$_hashes,$_emails,$_subdomains,$_references,$_votes,$_permalink,$_upd_time,$_curr_interval_update_time){
-        $sql = 'call pr_update_domain_info("' . $_domain . '","' . $_resolutions . '","' . $_hashes . '","' . $_emails . '","' . $_subdomains . '","' . $_references . '","' . $_votes . '","' . $_permalink . '","' . $_upd_time . '",' . $_curr_interval_update_time . ')';
+    public function update_domain_threat_info($_domain,$_last_resolved,$_ip_address,$_hashes,$_emails,$_subdomains,$_references,$_votes,$_permalink,$_upd_time,$_curr_interval_update_time){
+        $sql = 'call pr_update_domain_info("' . $_domain . '","' . $_last_resolved . '","' . $_ip_address . '","' . $_hashes . '","' . $_emails . '","' . $_subdomains . '","' . $_references . '","' . $_votes . '","' . $_permalink . '","' . $_upd_time . '",' . $_curr_interval_update_time . ')';
         $this->db->ReturnDataTable($sql);
     }
 
+    /**
+     * 更新IP威胁信息
+     * @param $_ip_address
+     * @param $_last_resolved
+     * @param $_domain
+     * @param $_hashes
+     * @param $_references
+     * @param $_votes
+     * @param $_permalink
+     * @param $_upd_time
+     * @param $_curr_interval_update_time
+     */
+    public function update_ip_threat_info($_ip_address, $_last_resolved, $_domain, $_hashes, $_references, $_votes, $_permalink, $_upd_time, $_curr_interval_update_time){
+        $sql = 'call pr_update_ip_info("' . $_ip_address . '","' . $_last_resolved . '","' . $_domain . '","' . $_hashes . '","' . $_references . '","' . $_votes . '","' . $_permalink . '","' . $_upd_time . '",' . $_curr_interval_update_time . ')';
+        $this->db->ReturnDataTable($sql);
+    }
 
     /**
      * 更新ANTIVIRUS威胁信息
@@ -113,7 +130,7 @@ class Common{
      * @return array
      */
     public function get_location_info($_ip_address){
-        $sql = 'SELECT * FROM searip WHERE IPAddress="' . $_ip_address . '"';
+        $sql = 'SELECT * FROM location_info WHERE IPAddress="' . $_ip_address . '"';
         return $this->db->GetResult($sql);
     }
 
@@ -137,6 +154,15 @@ class Common{
         return $this->db->GetResult($sql);
     }
 
+    /**
+     * 通过SQL获取ip威胁信息
+     * @param $_ip_address
+     * @return null
+     */
+    public function get_ip_threat_info($_ip_address){
+        $sql = 'SELECT * FROM threat_ip WHERE ip_address="' . $_ip_address . '"';
+        return $this->db->GetResult($sql);
+    }
 
     /**
      * 通过SQL查询antivirus威胁信息
