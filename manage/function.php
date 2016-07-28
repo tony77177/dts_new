@@ -142,6 +142,10 @@ function get_threat_info($_api_link, $_search_info, $_flag, $_dbinfo, $_curr_int
         case 'domain':  //域名信息查询
             //处理逻辑：先读库获取，获取失败再利用API获取
             $result_info = $common->get_domain_threat_info($_search_info);
+            $a=time();
+            $b=strtotime($result_info['upd_time']);
+            $c=$a-$b;
+
             if (($result_info != null) && (time() - strtotime($result_info['upd_time']) < $_curr_interval_update_time)) {
                 //组装JSON数据
                 $tmp_data = array(
@@ -398,6 +402,10 @@ function export_location_excel($_search_info,$_result_info){
         $objPHPExcel->setActiveSheetIndex(0)->getColumnDimension('E')->setWidth(14);
         $objPHPExcel->setActiveSheetIndex(0)->getColumnDimension('F')->setWidth(15);
         $objPHPExcel->setActiveSheetIndex(0)->getColumnDimension('J')->setWidth(15);
+        $objPHPExcel->setActiveSheetIndex(0)->getColumnDimension('L')->setWidth(20);
+        $objPHPExcel->setActiveSheetIndex(0)->getColumnDimension('M')->setWidth(18);
+        $objPHPExcel->setActiveSheetIndex(0)->getColumnDimension('N')->setWidth(18);
+        $objPHPExcel->setActiveSheetIndex(0)->getColumnDimension('O')->setWidth(18);
 
         //设置列垂直居中
 //        $objPHPExcel->setActiveSheetIndex(0)->getStyle('A' . ($i + 2) . ':O' . ($i + 2))->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
@@ -642,7 +650,7 @@ function export_threat_excel($_search_info, $_result_info, $_threat_option){
                 $objPHPExcel->setActiveSheetIndex(0)->getColumnDimension('H')->setAutoSize(true);
 
                 //设置列垂直居中
-                $objPHPExcel->setActiveSheetIndex(0)->getStyle('A' . ($i + 2) . ':H' . ($i + 2))->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+//                $objPHPExcel->setActiveSheetIndex(0)->getStyle('A' . ($i + 2) . ':H' . ($i + 2))->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
             }
             break;
 

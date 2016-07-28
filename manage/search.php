@@ -40,10 +40,10 @@ switch ($_GET['flag']) {
         /*批量查询操作，组装成批量的API请求并生成对应的excel文档*/
         if ($multi_flag) {
             $result_arr = array();//结果数组
-            $search_info = explode(',',$search_info);
+            $search_info = explode(',', $search_info);
 
             for ($i = 0; $i < count($search_info); $i++) {
-                $result_arr[$i] = get_location_info($api_index, $api_link . gethostbyname($search_info[$i]), $token, $search_info[$i], $databaseinfo,$curr_interval_update_time);
+                $result_arr[$i] = get_location_info($api_index, $api_link . gethostbyname($search_info[$i]), $token, $search_info[$i], $databaseinfo, $curr_interval_update_time);
                 if ($result_arr[$i]->ret == 'ok') {//查询成功时才写库
                     $common->update_ip_adderss_info(gethostbyname($search_info[$i]), $result_arr[$i]->data[0], $result_arr[$i]->data[1], $result_arr[$i]->data[2], $result_arr[$i]->data[3], $result_arr[$i]->data[4], $result_arr[$i]->data[5], $result_arr[$i]->data[6], $result_arr[$i]->data[7], $result_arr[$i]->data[8], $result_arr[$i]->data[9], $result_arr[$i]->data[10], $result_arr[$i]->data[11], $result_arr[$i]->data[12], date('Y-m-d H:i:s', time()), $curr_interval_update_time);
                 }
@@ -56,7 +56,7 @@ switch ($_GET['flag']) {
         $api_link .= gethostbyname($search_info);
 
         /*IP地址结果获取*/
-        $result = get_location_info($api_index, $api_link, $token, $search_info, $databaseinfo,$curr_interval_update_time);
+        $result = get_location_info($api_index, $api_link, $token, $search_info, $databaseinfo, $curr_interval_update_time);
 
         //当查询成功时将数据入库
         if ($result != 'fail') {
@@ -98,12 +98,12 @@ switch ($_GET['flag']) {
         if ($multi_flag) {
 
             $result_arr = array();//结果数组
-            $threat_info = explode(',',$threat_info);
+            $threat_info = explode(',', $threat_info);
 
             switch ($threat_option) {
                 case 'email':
                     for ($i = 0; $i < count($threat_info); $i++) {
-                        $result_arr[$i] = get_threat_info($config['threat_info_api'][$threat_option] . $threat_info[$i], $threat_info[$i], $threat_option, $databaseinfo);
+                        $result_arr[$i] = get_threat_info($config['threat_info_api'][$threat_option] . $threat_info[$i], $threat_info[$i], $threat_option, $databaseinfo, $curr_interval_update_time);
                         if ($result_arr[$i]->response_code == '1') {//查询成功时才写库
                             $common->update_email_threat_info($threat_info[$i], $result_arr[$i]->domains, $result_arr[$i]->references, $result_arr[$i]->permalink, date('Y-m-d H:i:s', time()), $curr_interval_update_time);
                         }
@@ -111,7 +111,7 @@ switch ($_GET['flag']) {
                     break;
                 case 'domain':
                     for ($i = 0; $i < count($threat_info); $i++) {
-                        $result_arr[$i] = get_threat_info($config['threat_info_api'][$threat_option] . $threat_info[$i], $threat_info[$i], $threat_option, $databaseinfo);
+                        $result_arr[$i] = get_threat_info($config['threat_info_api'][$threat_option] . $threat_info[$i], $threat_info[$i], $threat_option, $databaseinfo, $curr_interval_update_time);
                         if ($result_arr[$i]->response_code == '1') {//查询成功时才写库
                             $common->update_domain_threat_info($threat_info[$i], $result_arr[$i]->last_resolved, $result_arr[$i]->ip_address, $result_arr[$i]->hashes, $result_arr[$i]->emails, $result_arr[$i]->subdomains, $result_arr[$i]->references, $result_arr[$i]->votes, $result_arr[$i]->permalink, date('Y-m-d H:i:s', time()), $curr_interval_update_time);
                         }
@@ -120,7 +120,7 @@ switch ($_GET['flag']) {
 
                 case 'ip':
                     for ($i = 0; $i < count($threat_info); $i++) {
-                        $result_arr[$i] = get_threat_info($config['threat_info_api'][$threat_option] . $threat_info[$i], $threat_info[$i], $threat_option, $databaseinfo);
+                        $result_arr[$i] = get_threat_info($config['threat_info_api'][$threat_option] . $threat_info[$i], $threat_info[$i], $threat_option, $databaseinfo, $curr_interval_update_time);
                         if ($result_arr[$i]->response_code == '1') {//查询成功时才写库
                             $common->update_ip_threat_info($threat_info[$i], $result_arr[$i]->last_resolved, $result_arr[$i]->domain, $result_arr[$i]->hashes, $result_arr[$i]->references, $result_arr[$i]->votes, $result_arr[$i]->permalink, date('Y-m-d H:i:s', time()), $curr_interval_update_time);
                         }
@@ -130,7 +130,7 @@ switch ($_GET['flag']) {
                 case 'hash':
 
                     for ($i = 0; $i < count($threat_info); $i++) {
-                        $result_arr[$i] = get_threat_info($config['threat_info_api'][$threat_option] . $threat_info[$i], $threat_info[$i], $threat_option, $databaseinfo);
+                        $result_arr[$i] = get_threat_info($config['threat_info_api'][$threat_option] . $threat_info[$i], $threat_info[$i], $threat_option, $databaseinfo, $curr_interval_update_time);
                         if ($result_arr[$i]->response_code == '1') {//查询成功时才写库
                             $common->update_hash_threat_info($threat_info[$i], $result_arr[$i]->md5, $result_arr[$i]->sha1, $result_arr[$i]->scans, $result_arr[$i]->ips, $result_arr[$i]->domains, $result_arr[$i]->references, $result_arr[$i]->permalink, date('Y-m-d H:i:s', time()), $curr_interval_update_time);
                         }
@@ -140,7 +140,7 @@ switch ($_GET['flag']) {
 
                 case 'antivirus':
                     for ($i = 0; $i < count($threat_info); $i++) {
-                        $result_arr[$i] = get_threat_info($config['threat_info_api'][$threat_option] . $threat_info[$i], $threat_info[$i], $threat_option, $databaseinfo);
+                        $result_arr[$i] = get_threat_info($config['threat_info_api'][$threat_option] . $threat_info[$i], $threat_info[$i], $threat_option, $databaseinfo, $curr_interval_update_time);
                         if ($result_arr[$i]->response_code == '1') {//查询成功时才写库
                             $common->update_antivirus_threat_info($threat_info[$i], $result_arr[$i]->hashes, $result_arr[$i]->references, $result_arr[$i]->permalink, date('Y-m-d H:i:s', time()), $curr_interval_update_time);
                         }
@@ -150,14 +150,14 @@ switch ($_GET['flag']) {
                     break;
             }
 
-            die(export_threat_excel($threat_info,$result_arr,$threat_option));
+            die(export_threat_excel($threat_info, $result_arr, $threat_option));
         }
 
         /*API地址拼接*/
-        $threat_api_link = $config['threat_info_api'][$threat_option].$threat_info;
+        $threat_api_link = $config['threat_info_api'][$threat_option] . $threat_info;
 
         /*威胁信息结果获取*/
-        $result = get_threat_info($threat_api_link, $threat_info, $threat_option, $databaseinfo);
+        $result = get_threat_info($threat_api_link, $threat_info, $threat_option, $databaseinfo, $curr_interval_update_time);
 
 
         //当查询成功时将数据入库
@@ -183,14 +183,28 @@ switch ($_GET['flag']) {
 
                     //组装单个查询前台显示列表
                     $tmp_data = '<b>Resolutions：</b>';
-                    $tmp_data .= '<br>&nbsp;last_resolved：' . (($result->last_resolved != '') ? $result->last_resolved : 'N/A');
-                    $tmp_data .= '<br>&nbsp;ip_address：' . (($result->ip_address != '') ? $result->ip_address : 'N/A');
+
+                    $last_resolved_array = explode(',',$result->last_resolved);
+                    $ip_address_array = explode(',',$result->ip_address);
+                    for ($i=0; $i < count($last_resolved_array); $i++) {
+                        $tmp_data .= '<br>&nbsp;last_resolved：' . (($last_resolved_array[$i] != '') ? $last_resolved_array[$i] : 'N/A');
+                        $tmp_data .= '<br>&nbsp;ip_address：' . (($ip_address_array[$i] != '') ? $ip_address_array[$i] : 'N/A');
+                    }
+
                     $tmp_data .= '<br><b>Hashes：</b>';
                     $tmp_data .= (($result->hashes != '') ? $result->hashes : 'N/A');
                     $tmp_data .= '<br><b>Emails：</b>';
                     $tmp_data .= (($result->emails != '') ? $result->emails : 'N/A');
                     $tmp_data .= '<br><b>Subdomains：</b>';
-                    $tmp_data .= (($result->subdomains != '') ? $result->subdomains : 'N/A');
+
+                    $subdomains_array = explode(',', $result->subdomains);
+                    for ($i=0; $i < count($subdomains_array); $i++) {
+                        if ($i % 3 == 0) {
+                            $tmp_data .= '<br>';
+                        }
+                        $tmp_data .= (($subdomains_array[$i] != '') ? $subdomains_array[$i] . ' , ' : 'N/A');
+                    }
+
                     $tmp_data .= '<br><b>References：</b>';
                     $tmp_data .= (($result->references != '') ? $result->references : 'N/A');
                     $tmp_data .= '<br><b>Votes：</b>';
@@ -207,17 +221,32 @@ switch ($_GET['flag']) {
 
                     //组装单个查询前台显示列表
                     $tmp_data = '<b>Resolutions：</b>';
-                    $tmp_data .= '<br>&nbsp;last_resolved：' . (($result->last_resolved != '') ? $result->last_resolved : 'N/A');
-                    $tmp_data .= '<br>&nbsp;domain：' . (($result->domain != '') ? $result->domain : 'N/A');
+
+                    $last_resolved_array = explode(',', $result->last_resolved);
+                    $domain_array = explode(',', $result->domain);
+                    for ($i = 0; $i < count($last_resolved_array); $i++) {
+                        $tmp_data .= '<br>&nbsp;last_resolved：' . (($last_resolved_array[$i] != '') ? $last_resolved_array[$i] : 'N/A');
+                        $tmp_data .= '<br>&nbsp;domain：' . (($domain_array[$i] != '') ? $domain_array[$i] : 'N/A');
+                    }
+
                     $tmp_data .= '<br><b>Hashes：</b>';
-                    $tmp_data .= (($result->hashes != '') ? $result->hashes : 'N/A');
+
+                    $hashes_array = explode(',',$result->hashes);
+                    for ($i = 0; $i < count($hashes_array); $i++) {
+                        if ($i % 3 == 0) {
+                            $tmp_data .= '<br>';
+                        }
+                        $tmp_data .= ($hashes_array[$i] != '' ? $hashes_array[$i] . ' , ' : 'N/A');
+                    }
+
+//                    $tmp_data .= (($result->hashes != '') ? $result->hashes : 'N/A');
                     $tmp_data .= '<br><b>References：</b>';
                     $tmp_data .= (($result->references != '') ? $result->references : 'N/A');
                     $tmp_data .= '<br><b>Votes：</b>';
                     $tmp_data .= (($result->votes != '') ? $result->votes : 'N/A');
                     $tmp_data .= '<br><b>Permalink：</b>';
                     $tmp_data .= (($result->permalink != '') ? $result->permalink : 'N/A');
-                    
+
                     break;
 
                 case 'hash':
@@ -231,7 +260,16 @@ switch ($_GET['flag']) {
                     $tmp_data .= '<br><b>Sha1：</b>';
                     $tmp_data .= (($result->sha1 != '') ? $result->sha1 : 'N/A');
                     $tmp_data .= '<br><b>Scans：</b>';
-                    $tmp_data .= (($result->scans != '') ? $result->scans : 'N/A');
+
+                    $scans_array = explode(',',$result->scans);
+                    for ($i = 0; $i < count($scans_array); $i++) {
+                        if ($i % 3 == 0) {
+                            $tmp_data .= '<br>';
+                        }
+                        $tmp_data .= ($scans_array[$i] != '' ? $scans_array[$i] . ' , ' : 'N/A , ');
+                    }
+
+//                    $tmp_data .= (($result->scans != '') ? $result->scans : 'N/A');
                     $tmp_data .= '<br><b>Ips：</b>';
                     $tmp_data .= (($result->ips != '') ? $result->ips : 'N/A');
                     $tmp_data .= '<br><b>Domains：</b>';
@@ -250,10 +288,17 @@ switch ($_GET['flag']) {
 
                     //组装单个查询前台显示列表
                     $tmp_data = '<br><b>Hashes：</b>';
-                    $tmp_data .= (($result->hashes != '') ? $result->hashes : 'N/A');
-                    $tmp_data .= '<br><b>References：</b>';
+                    $hashes_array = explode(',',$result->hashes);
+                    for ($i = 0; $i < count($hashes_array); $i++) {
+                        if ($i % 3 == 0) {
+                            $tmp_data .= '<br>';
+                        }
+                        $tmp_data .= $hashes_array[$i].' , ';
+                    }
+//                    $tmp_data .= (($result->hashes != '') ? $result->hashes : 'N/A');
+                    $tmp_data .= '<br><br><b>References：</b>';
                     $tmp_data .= (($result->references != '') ? $result->references : 'N/A');
-                    $tmp_data .= '<br><b>Permalink：</b>';
+                    $tmp_data .= '<br><br><b>Permalink：</b>';
                     $tmp_data .= (($result->permalink != '') ? $result->permalink : 'N/A');
 
                     break;
@@ -263,10 +308,7 @@ switch ($_GET['flag']) {
             //结果赋值
             $result = $tmp_data;
         }
-
-
         die($result);
-
         break;
 
     default:
