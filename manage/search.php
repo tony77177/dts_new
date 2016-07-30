@@ -171,9 +171,23 @@ switch ($_GET['flag']) {
 
                     //组装单个查询前台显示列表
                     $tmp_data = '<b>Domains：</b>';
-                    $tmp_data .= $result->domains;
+                    $domains_array = explode(',', $result->domains);
+                    for ($i = 0; $i < count($domains_array); $i++) {
+                        if ($i % 3 == 0) {
+                            $tmp_data .= '<br>';
+                        }
+                        $tmp_data .= (($domains_array[$i] != '') ? $domains_array[$i] . ' , ' : 'N/A , ');
+                    }
+
                     $tmp_data .= '<br><b>References：</b>';
-                    $tmp_data .= (($result->references != '') ? $result->references : 'N/A');
+                    $references_array = explode(',', $result->references);
+                    for ($i = 0; $i < count($references_array); $i++) {
+                        if ($i % 1 == 0) {
+                            $tmp_data .= '<br>';
+                        }
+                        $tmp_data .= (($references_array[$i] != '') ? $references_array[$i] . '' : 'N/A');
+                    }
+
                     $tmp_data .= '<br><b>Permalink：</b>';
                     $tmp_data .= (($result->permalink != '') ? $result->permalink : 'N/A');
                     break;
@@ -184,29 +198,50 @@ switch ($_GET['flag']) {
                     //组装单个查询前台显示列表
                     $tmp_data = '<b>Resolutions：</b>';
 
-                    $last_resolved_array = explode(',',$result->last_resolved);
-                    $ip_address_array = explode(',',$result->ip_address);
-                    for ($i=0; $i < count($last_resolved_array); $i++) {
+                    $last_resolved_array = explode(',', $result->last_resolved);
+                    $ip_address_array = explode(',', $result->ip_address);
+                    for ($i = 0; $i < count($last_resolved_array); $i++) {
                         $tmp_data .= '<br>&nbsp;last_resolved：' . (($last_resolved_array[$i] != '') ? $last_resolved_array[$i] : 'N/A');
                         $tmp_data .= '<br>&nbsp;ip_address：' . (($ip_address_array[$i] != '') ? $ip_address_array[$i] : 'N/A');
                     }
 
                     $tmp_data .= '<br><b>Hashes：</b>';
-                    $tmp_data .= (($result->hashes != '') ? $result->hashes : 'N/A');
-                    $tmp_data .= '<br><b>Emails：</b>';
-                    $tmp_data .= (($result->emails != '') ? $result->emails : 'N/A');
-                    $tmp_data .= '<br><b>Subdomains：</b>';
-
-                    $subdomains_array = explode(',', $result->subdomains);
-                    for ($i=0; $i < count($subdomains_array); $i++) {
+                    $hashes_array = explode(',', $result->hashes);
+                    for ($i = 0; $i < count($hashes_array); $i++) {
                         if ($i % 3 == 0) {
                             $tmp_data .= '<br>';
                         }
-                        $tmp_data .= (($subdomains_array[$i] != '') ? $subdomains_array[$i] . ' , ' : 'N/A');
+                        $tmp_data .= (($hashes_array[$i] != '') ? $hashes_array[$i] . ' , ' : 'N/A , ');
+                    }
+
+                    $tmp_data .= '<br><b>Emails：</b>';
+                    $emails_array = explode(',', $result->emails);
+                    for ($i = 0; $i < count($emails_array); $i++) {
+                        if ($i % 3 == 0) {
+                            $tmp_data .= '<br>';
+                        }
+                        $tmp_data .= (($emails_array[$i] != '') ? $emails_array[$i] . ' , ' : 'N/A , ');
+                    }
+
+
+                    $tmp_data .= '<br><b>Subdomains：</b>';
+                    $subdomains_array = explode(',', $result->subdomains);
+                    for ($i = 0; $i < count($subdomains_array); $i++) {
+                        if ($i % 3 == 0) {
+                            $tmp_data .= '<br>';
+                        }
+                        $tmp_data .= (($subdomains_array[$i] != '') ? $subdomains_array[$i] . ' , ' : 'N/A , ');
                     }
 
                     $tmp_data .= '<br><b>References：</b>';
-                    $tmp_data .= (($result->references != '') ? $result->references : 'N/A');
+                    $references_array = explode(',', $result->references);
+                    for ($i = 0; $i < count($references_array); $i++) {
+                        if ($i % 1 == 0) {
+                            $tmp_data .= '<br>';
+                        }
+                        $tmp_data .= (($references_array[$i] != '') ? $references_array[$i] . '' : 'N/A');
+                    }
+
                     $tmp_data .= '<br><b>Votes：</b>';
                     $tmp_data .= (($result->votes != '') ? $result->votes : 'N/A');
                     $tmp_data .= '<br><b>Permalink：</b>';
@@ -231,7 +266,7 @@ switch ($_GET['flag']) {
 
                     $tmp_data .= '<br><b>Hashes：</b>';
 
-                    $hashes_array = explode(',',$result->hashes);
+                    $hashes_array = explode(',', $result->hashes);
                     for ($i = 0; $i < count($hashes_array); $i++) {
                         if ($i % 3 == 0) {
                             $tmp_data .= '<br>';
@@ -239,9 +274,15 @@ switch ($_GET['flag']) {
                         $tmp_data .= ($hashes_array[$i] != '' ? $hashes_array[$i] . ' , ' : 'N/A');
                     }
 
-//                    $tmp_data .= (($result->hashes != '') ? $result->hashes : 'N/A');
                     $tmp_data .= '<br><b>References：</b>';
-                    $tmp_data .= (($result->references != '') ? $result->references : 'N/A');
+                    $references_array = explode(',', $result->references);
+                    for ($i = 0; $i < count($references_array); $i++) {
+                        if ($i % 1 == 0) {
+                            $tmp_data .= '<br>';
+                        }
+                        $tmp_data .= (($references_array[$i] != '') ? $references_array[$i] . '' : 'N/A');
+                    }
+
                     $tmp_data .= '<br><b>Votes：</b>';
                     $tmp_data .= (($result->votes != '') ? $result->votes : 'N/A');
                     $tmp_data .= '<br><b>Permalink：</b>';
@@ -259,9 +300,9 @@ switch ($_GET['flag']) {
                     $tmp_data .= (($result->md5 != '') ? $result->md5 : 'N/A');
                     $tmp_data .= '<br><b>Sha1：</b>';
                     $tmp_data .= (($result->sha1 != '') ? $result->sha1 : 'N/A');
-                    $tmp_data .= '<br><b>Scans：</b>';
 
-                    $scans_array = explode(',',$result->scans);
+                    $tmp_data .= '<br><b>Scans：</b>';
+                    $scans_array = explode(',', $result->scans);
                     for ($i = 0; $i < count($scans_array); $i++) {
                         if ($i % 3 == 0) {
                             $tmp_data .= '<br>';
@@ -269,13 +310,33 @@ switch ($_GET['flag']) {
                         $tmp_data .= ($scans_array[$i] != '' ? $scans_array[$i] . ' , ' : 'N/A , ');
                     }
 
-//                    $tmp_data .= (($result->scans != '') ? $result->scans : 'N/A');
                     $tmp_data .= '<br><b>Ips：</b>';
-                    $tmp_data .= (($result->ips != '') ? $result->ips : 'N/A');
+                    $ips_array = explode(',', $result->ips);
+                    for ($i = 0; $i < count($ips_array); $i++) {
+                        if ($i % 3 == 0) {
+                            $tmp_data .= '<br>';
+                        }
+                        $tmp_data .= ($ips_array[$i] != '' ? $ips_array[$i] . ' , ' : 'N/A , ');
+                    }
+
                     $tmp_data .= '<br><b>Domains：</b>';
-                    $tmp_data .= (($result->domains != '') ? $result->domains : 'N/A');
+                    $domains_array = explode(',', $result->domains);
+                    for ($i = 0; $i < count($domains_array); $i++) {
+                        if ($i % 3 == 0) {
+                            $tmp_data .= '<br>';
+                        }
+                        $tmp_data .= ($domains_array[$i] != '' ? $domains_array[$i] . ' , ' : 'N/A , ');
+                    }
+
                     $tmp_data .= '<br><b>References：</b>';
-                    $tmp_data .= (($result->references != '') ? $result->references : 'N/A');
+                    $references_array = explode(',', $result->references);
+                    for ($i = 0; $i < count($references_array); $i++) {
+                        if ($i % 1 == 0) {
+                            $tmp_data .= '<br>';
+                        }
+                        $tmp_data .= (($references_array[$i] != '') ? $references_array[$i] . '' : 'N/A');
+                    }
+
                     $tmp_data .= '<br><b>Permalink：</b>';
                     $tmp_data .= (($result->permalink != '') ? $result->permalink : 'N/A');
 
@@ -288,17 +349,24 @@ switch ($_GET['flag']) {
 
                     //组装单个查询前台显示列表
                     $tmp_data = '<br><b>Hashes：</b>';
-                    $hashes_array = explode(',',$result->hashes);
+                    $hashes_array = explode(',', $result->hashes);
                     for ($i = 0; $i < count($hashes_array); $i++) {
                         if ($i % 3 == 0) {
                             $tmp_data .= '<br>';
                         }
-                        $tmp_data .= $hashes_array[$i].' , ';
+                        $tmp_data .= $hashes_array[$i] . ' , ';
                     }
-//                    $tmp_data .= (($result->hashes != '') ? $result->hashes : 'N/A');
-                    $tmp_data .= '<br><br><b>References：</b>';
-                    $tmp_data .= (($result->references != '') ? $result->references : 'N/A');
-                    $tmp_data .= '<br><br><b>Permalink：</b>';
+
+                    $tmp_data .= '<br><b>References：</b>';
+                    $references_array = explode(',', $result->references);
+                    for ($i = 0; $i < count($references_array); $i++) {
+                        if ($i % 1 == 0) {
+                            $tmp_data .= '<br>';
+                        }
+                        $tmp_data .= (($references_array[$i] != '') ? $references_array[$i] . '' : 'N/A');
+                    }
+
+                    $tmp_data .= '<br><b>Permalink：</b>';
                     $tmp_data .= (($result->permalink != '') ? $result->permalink : 'N/A');
 
                     break;

@@ -74,7 +74,7 @@
 
 <script>
 
-    $(document).ready(function() {
+    $(document).ready(function () {
 
         $(".threat_option").select2({
             placeholder: "请选择查询类别",
@@ -82,9 +82,9 @@
             width: '150px'
         });
 
-        $("#btn_search").click(function(){
+        $("#btn_search").click(function () {
             var search_info = $("#search_info").val();
-            if(search_info==''){
+            if (search_info == '') {
                 var d = dialog({
                     content: '请输入查询内容'
                 });
@@ -97,16 +97,17 @@
 
             //loading事件
             dialog({
-                id:'result_info',
-                title:'查询中，请稍后...',
-                width:150
+                id: 'result_info',
+                title: '查询中，请稍后...',
+                width: 150,
+                quickClose: true
             }).show();
 
             var tmp = skipEmptyElementForArray(search_info.split(' '));
             var url = 'manage/search.php?flag=location_search';
 
             if (tmp.length > 1) {
-                url = 'manage/search.php?flag=location_search&multi=1&_search_info='+tmp;
+                url = 'manage/search.php?flag=location_search&multi=1&_search_info=' + tmp;
                 download_file(url);
                 dialog.get('result_info').close();
                 return;
@@ -116,7 +117,8 @@
                 if (msg == 'fail') {
                     var d = dialog({
                         title: '结果',
-                        content: '查询失败，请确认输入数据的正确性。'
+                        content: '查询失败，请确认输入数据的正确性。',
+                        quickClose: true
                     });
                     d.show();
                     dialog.get('result_info').close();
@@ -147,12 +149,13 @@
             dialog({
                 id: 'result_info',
                 title: '查询中，请稍后...',
-                width: 150
+                width: 150,
+                quickClose: true
             }).show();
 
             var tmp = skipEmptyElementForArray(threat_info.split(' '));//去掉多余的中间空格
             var url = 'manage/search.php?flag=threat_search';
-//            alert(tmp);return;
+
             //批量操作
             if (tmp.length > 1) {
                 url = 'manage/search.php?flag=threat_search&multi=1&_threat_option=' + threat_option + '&_threat_info=' + tmp;
@@ -165,7 +168,8 @@
                 if (msg == 'fail') {
                     var d = dialog({
                         title: '结果',
-                        content: '暂无数据，请更换查询内容重试。'
+                        content: '暂无数据，请更换查询内容重试。',
+                        quickClose: true
                     });
                     d.show();
                     dialog.get('result_info').close();
@@ -179,7 +183,6 @@
 
         /*通过iframe下载文件*/
         function download_file(_url) {
-            //var url = _url;
             var download_iframe = document.createElement("iframe");
             document.body.appendChild(download_iframe)
             download_iframe.src = _url;

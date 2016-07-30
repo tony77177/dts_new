@@ -8,15 +8,14 @@
  */
 
 
-
-
 /**
  * 获取归属地信息
  * $_index       索引号 //用来区分调用哪个网站API
  * $_api_link    API地址
  * return $result 结果信息
  */
-function get_location_info($_index, $_api_link,$_token,$_search_info,$_dbinfo,$_curr_interval_update_time){
+function get_location_info($_index, $_api_link, $_token, $_search_info, $_dbinfo, $_curr_interval_update_time)
+{
     $result = "fail";
     //die($_index);
     switch ($_index) {
@@ -109,7 +108,8 @@ function get_location_info($_index, $_api_link,$_token,$_search_info,$_dbinfo,$_
  * @param $_dbinfo          数据库信息
  * @return array|mixed|string
  */
-function get_threat_info($_api_link, $_search_info, $_flag, $_dbinfo, $_curr_interval_update_time){
+function get_threat_info($_api_link, $_search_info, $_flag, $_dbinfo, $_curr_interval_update_time)
+{
     $result = 'fail';
     $common = new Common($_dbinfo);
     switch ($_flag) {
@@ -142,9 +142,9 @@ function get_threat_info($_api_link, $_search_info, $_flag, $_dbinfo, $_curr_int
         case 'domain':  //域名信息查询
             //处理逻辑：先读库获取，获取失败再利用API获取
             $result_info = $common->get_domain_threat_info($_search_info);
-            $a=time();
-            $b=strtotime($result_info['upd_time']);
-            $c=$a-$b;
+            $a = time();
+            $b = strtotime($result_info['upd_time']);
+            $c = $a - $b;
 
             if (($result_info != null) && (time() - strtotime($result_info['upd_time']) < $_curr_interval_update_time)) {
                 //组装JSON数据
@@ -291,14 +291,14 @@ function get_threat_info($_api_link, $_search_info, $_flag, $_dbinfo, $_curr_int
 }
 
 
-
 /**
  * 通过CURL获取页面信息
  * @param $_url
  * @param $_token
  * @return mixed
  */
-function get_page_info($_url, $_token){
+function get_page_info($_url, $_token)
+{
     $headers = array($_token);
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $_url);
@@ -331,7 +331,8 @@ function get_page_info($_url, $_token){
  * @param $_result_info 查询结果
  * @throws PHPExcel_Reader_Exception    输出excel文档
  */
-function export_location_excel($_search_info,$_result_info){
+function export_location_excel($_search_info, $_result_info)
+{
     //新建Excel类
     $objPHPExcel = new PHPExcel();
     $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
@@ -370,28 +371,28 @@ function export_location_excel($_search_info,$_result_info){
 
     //添加内容
     for ($i = 0; $i < count($_search_info); $i++) {
-        if($_result_info[$i]->ret=='ok'){
+        if ($_result_info[$i]->ret == 'ok') {
             $objPHPExcel->setActiveSheetIndex(0)
-                ->setCellValue('A'.($i+2), $_search_info[$i])
-                ->setCellValue('B'.($i+2), gethostbyname($_search_info[$i]))
-                ->setCellValue('C'.($i+2), $_result_info[$i]->data[0])
-                ->setCellValue('D'.($i+2), $_result_info[$i]->data[1])
-                ->setCellValue('E'.($i+2), $_result_info[$i]->data[2])
-                ->setCellValue('F'.($i+2), $_result_info[$i]->data[3])
-                ->setCellValue('G'.($i+2), $_result_info[$i]->data[4])
-                ->setCellValue('H'.($i+2), $_result_info[$i]->data[5])
-                ->setCellValue('I'.($i+2), $_result_info[$i]->data[6])
-                ->setCellValue('J'.($i+2), $_result_info[$i]->data[7])
-                ->setCellValue('K'.($i+2), $_result_info[$i]->data[8])
-                ->setCellValue('L'.($i+2), $_result_info[$i]->data[9])
-                ->setCellValue('M'.($i+2), $_result_info[$i]->data[10])
-                ->setCellValue('N'.($i+2), $_result_info[$i]->data[11])
-                ->setCellValue('O'.($i+2), $_result_info[$i]->data[12]);
-        }else{
+                ->setCellValue('A' . ($i + 2), $_search_info[$i])
+                ->setCellValue('B' . ($i + 2), gethostbyname($_search_info[$i]))
+                ->setCellValue('C' . ($i + 2), $_result_info[$i]->data[0])
+                ->setCellValue('D' . ($i + 2), $_result_info[$i]->data[1])
+                ->setCellValue('E' . ($i + 2), $_result_info[$i]->data[2])
+                ->setCellValue('F' . ($i + 2), $_result_info[$i]->data[3])
+                ->setCellValue('G' . ($i + 2), $_result_info[$i]->data[4])
+                ->setCellValue('H' . ($i + 2), $_result_info[$i]->data[5])
+                ->setCellValue('I' . ($i + 2), $_result_info[$i]->data[6])
+                ->setCellValue('J' . ($i + 2), $_result_info[$i]->data[7])
+                ->setCellValue('K' . ($i + 2), $_result_info[$i]->data[8])
+                ->setCellValue('L' . ($i + 2), $_result_info[$i]->data[9])
+                ->setCellValue('M' . ($i + 2), $_result_info[$i]->data[10])
+                ->setCellValue('N' . ($i + 2), $_result_info[$i]->data[11])
+                ->setCellValue('O' . ($i + 2), $_result_info[$i]->data[12]);
+        } else {
             $objPHPExcel->setActiveSheetIndex(0)
-                ->setCellValue('A'.($i+2), $_search_info[$i])
-                ->setCellValue('B'.($i+2), gethostbyname($_search_info[$i]))
-                ->setCellValue('C'.($i+2), '查询失败，请确认数据正确性');
+                ->setCellValue('A' . ($i + 2), $_search_info[$i])
+                ->setCellValue('B' . ($i + 2), gethostbyname($_search_info[$i]))
+                ->setCellValue('C' . ($i + 2), '查询失败，请确认数据正确性');
             $objPHPExcel->setActiveSheetIndex(0)->mergeCells('C' . ($i + 2) . ':O' . (($i + 2)));//合并单元格
         }
 
@@ -419,7 +420,7 @@ function export_location_excel($_search_info,$_result_info){
 
     // Redirect output to a client’s web browser (Excel5)
     header('Content-Type: application/vnd.ms-excel');
-    header('Content-Disposition: attachment;filename="批量查询结果-'.date("Ymdhis",time()).'.xls"');
+    header('Content-Disposition: attachment;filename="批量查询结果-' . date("Ymdhis", time()) . '.xls"');
     header('Cache-Control: max-age=0');
     // If you're serving to IE 9, then the following may be needed
     header('Cache-Control: max-age=1');
@@ -441,7 +442,8 @@ function export_location_excel($_search_info,$_result_info){
  * @throws PHPExcel_Exception
  * @throws PHPExcel_Reader_Exception
  */
-function export_threat_excel($_search_info, $_result_info, $_threat_option){
+function export_threat_excel($_search_info, $_result_info, $_threat_option)
+{
     //新建Excel类
     $objPHPExcel = new PHPExcel();
     $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');

@@ -25,7 +25,7 @@
 $config['ip_api_info'] = array(
     'taobao' => 'http://ip.taobao.com/service/getIpInfo.php?ip=',
     'ipip' => 'http://freeapi.ipip.net/',
-    'ipip_vip'=>'http://ipapi.ipip.net/find?addr=',
+    'ipip_vip' => 'http://ipapi.ipip.net/find?addr=',
     'ip138' => 'http://test.ip138.com/query/?ip='
 );
 
@@ -82,7 +82,6 @@ $config['threat_info_api'] = array(
 );
 
 
-
 /**
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *             数据库信息设置
@@ -111,11 +110,10 @@ $databaseinfo = array(
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * 设置数据库数据更新间隔时间
- *  单位为秒，默认为30天 24*60*60
+ *  单位为秒，默认为30天 30*24*60*60
  *
  */
-$curr_interval_update_time = '10';
-
+$curr_interval_update_time = '2592000';
 
 
 /**
