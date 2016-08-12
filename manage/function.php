@@ -17,14 +17,12 @@
 function get_location_info($_index, $_api_link, $_token, $_search_info, $_dbinfo, $_curr_interval_update_time)
 {
     $result = "fail";
-    //die($_index);
     switch ($_index) {
 
         case 'taobao':
 
             $result_info = json_decode(get_page_info($_api_link));//获取网页请求返回内容
 
-            //die(var_dump($result_info));
             //淘宝API返回code说明：0：成功，1：失败。
             if (!$result_info->code) {
                 $result = $result_info->data->country;
@@ -83,6 +81,8 @@ function get_location_info($_index, $_api_link, $_token, $_search_info, $_dbinfo
                 $result_info = json_decode(get_page_info($_api_link, $_token));
                 if ($result_info->ret == 'ok') {
                     $result = $result_info;
+                } elseif ($result_info->ret == 'err') {
+                    $result = 'err';
                 }
             }
 

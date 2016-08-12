@@ -59,7 +59,7 @@ switch ($_GET['flag']) {
         $result = get_location_info($api_index, $api_link, $token, $search_info, $databaseinfo, $curr_interval_update_time);
 
         //当查询成功时将数据入库
-        if ($result != 'fail') {
+        if ($result->ret = 'ok') {
 
             //查询成功，进行入库操作
             $common->update_ip_adderss_info(trim(gethostbyname($search_info)), $result->data[0], $result->data[1], $result->data[2], $result->data[3], $result->data[4], $result->data[5], $result->data[6], $result->data[7], $result->data[8], $result->data[9], $result->data[10], $result->data[11], $result->data[12], date('Y-m-d H:i:s', time()), $curr_interval_update_time);
@@ -379,9 +379,25 @@ switch ($_GET['flag']) {
         die($result);
         break;
 
+    //查询归属地token剩余时限
+    case 'token_search':
+        $token_api_link = 'http://ipapi.ipip.net/find_status';
+        $token_info = json_decode(get_page_info($token_api_link, $token));
+
+        if ($token_info->ret == 'ok') {
+            $tmp_data = '套餐名称：' . (($token_info->service->name != '') ? $token_info->service->name : 'N/A');
+            $tmp_data .= '<br>到期时间：' . (($token_info->service->expires != '') ? $token_info->service->expires : 'N/A');
+            $tmp_data .= '<br>是否受访问限制：' . (($token_info->data->limit == false) ? '否' : '是');
+            $tmp_data .= '<br>1小时内剩余请求次数：' . (($token_info->data->hour != '') ? $token_info->data->hour : 'N/A');
+            $tmp_data .= '<br>24小时内剩余请求次数：' . (($token_info->data->day != '') ? $token_info->data->day : 'N/A');
+            die($tmp_data);
+        } else {
+            die('err');
+        }
+        break;
+
     default:
         break;
 }
-
 
 ?>

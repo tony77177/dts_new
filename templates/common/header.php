@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <title><?php echo $config['cur_sys_title'];?></title>
+    <title><?php echo $config['cur_sys_title']; ?></title>
     <meta charset="utf-8">
 
     <!-- Bootstrap CSS -->
@@ -25,7 +25,7 @@
     <script src="resource/bootstrap/js/bootstrap.min.js"></script>
 
     <!-- Select2 -->
-    <link href="resource/select2/select2.min.css" rel="stylesheet" />
+    <link href="resource/select2/select2.min.css" rel="stylesheet"/>
     <script src="resource/select2/select2.min.js"></script>
 
 </head>
@@ -44,15 +44,12 @@
             </button>
             <a class="navbar-brand" style="color: #fff;" href="">
                 <span class="glyphicon glyphicon-menu-hamburger"></span>
-                <?php echo $config['cur_sys_title'];?>
+                <?php echo $config['cur_sys_title']; ?>
             </a>
-            <!--<a class="navbar-brand" style="color: #fff;" href="">域名批量解析系统1</a>
-            <a class="navbar-brand" style="color: #fff;" href="">域名批量解析系统2</a>-->
         </div>
         <div class="navbar-collapse collapse">
 
         </div>
-        <!--/.nav-collapse -->
     </div>
 </div>
 

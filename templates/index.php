@@ -1,5 +1,4 @@
-
-<?php require_once('templates/common/header.php');?>
+<?php require_once('templates/common/header.php'); ?>
 
 <hr style=""/>
 
@@ -70,6 +69,10 @@
 
     </div>
 
+    <div style="text-align: center;">
+<!--        <a href="javascript:;" id="btn_token" title="归属地token使用时限查询">归属地token使用时限查询</a>-->
+    </div>
+
 </div>
 
 <script>
@@ -118,6 +121,14 @@
                     var d = dialog({
                         title: '结果',
                         content: '查询失败，请确认输入数据的正确性。',
+                        quickClose: true
+                    });
+                    d.show();
+                    dialog.get('result_info').close();
+                } else if (msg == 'err') {
+                    var d = dialog({
+                        title: '错误',
+                        content: '归属地 token 已过期或设置错误，请检查 token 是否设置正确。',
                         quickClose: true
                     });
                     d.show();
@@ -181,6 +192,35 @@
             });
         });
 
+        $("#btn_token").click(function () {
+            //loading事件
+            dialog({
+                id: 'result_info',
+                title: '查询中，请稍后...',
+                width: 150,
+                quickClose: true
+            }).show();
+
+            var url = 'manage/search.php?flag=token_search';
+
+            $.get(url, {}, function (msg) {
+                if (msg == 'err') {
+                    var d = dialog({
+                        title: '错误',
+                        content: '归属地 token 已过期或设置错误，请检查 token 是否设置正确。',
+                        quickClose: true
+                    });
+                    d.show();
+                    dialog.get('result_info').close();
+                } else {
+                    dialog.get('result_info').width('auto');
+                    dialog.get('result_info').title('查询结果');
+                    dialog.get('result_info').content(msg);
+                }
+            });
+
+        });
+
         /*通过iframe下载文件*/
         function download_file(_url) {
             var download_iframe = document.createElement("iframe");
@@ -201,18 +241,8 @@
             return a;
         }
 
-        /* 响应回车事件 */
-        /*document.onkeydown = function(event){
-         if(event.keyCode==13) {
-         document.getElementById("btn_search").click();
-         return false;
-         }
-         };*/
-
-
     });
 
 </script>
 
-
-<?php require_once('templates/common/footer.php');?>
+<?php require_once('templates/common/footer.php'); ?>
