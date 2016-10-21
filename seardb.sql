@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: 2016-07-28 17:08:17
+-- Generation Time: 2016-10-21 19:05:33
 -- 服务器版本： 5.6.17
 -- PHP Version: 5.5.12
 
@@ -472,7 +472,21 @@ CREATE TABLE IF NOT EXISTS `location_info` (
   `Update_time` datetime NOT NULL,
   PRIMARY KEY (`IPId`),
   UNIQUE KEY `IPAdress` (`IPAddress`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=371 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `log_info`
+--
+
+CREATE TABLE IF NOT EXISTS `log_info` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_name` varchar(30) NOT NULL,
+  `ip_address` varchar(30) NOT NULL,
+  `login_date` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -488,7 +502,7 @@ CREATE TABLE IF NOT EXISTS `threat_antivirus` (
   `permalink` varchar(255) DEFAULT NULL,
   `upd_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=5 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -509,7 +523,7 @@ CREATE TABLE IF NOT EXISTS `threat_domain` (
   `permalink` varchar(255) DEFAULT NULL,
   `upd_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=7 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -525,7 +539,7 @@ CREATE TABLE IF NOT EXISTS `threat_email` (
   `permalink` varchar(255) DEFAULT NULL,
   `upd_time` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=10 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -545,7 +559,7 @@ CREATE TABLE IF NOT EXISTS `threat_hash` (
   `permalink` varchar(255) DEFAULT NULL,
   `upd_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=3 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -564,7 +578,20 @@ CREATE TABLE IF NOT EXISTS `threat_ip` (
   `permalink` varchar(255) NOT NULL,
   `upd_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=5 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `user_info`
+--
+
+CREATE TABLE IF NOT EXISTS `user_info` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_name` varchar(30) NOT NULL,
+  `user_pwd` varchar(100) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
