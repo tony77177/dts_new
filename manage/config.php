@@ -60,7 +60,7 @@ $config['cur_ip_api_cfg'] = 'ipip_vip';
  *
  */
 
-$config['cur_token'] = 'Token: 89bd0fbbb124c00a1bdec009208517cc7277b2bc';
+$config['cur_token'] = 'Token: 0c9cb5a116e69b156550b9590bb2920dc66b1a2a';
 
 
 /**

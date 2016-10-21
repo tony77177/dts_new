@@ -184,6 +184,28 @@ class Common{
         return $this->db->GetResult($sql);
     }
 
+    /**
+     * 用户登录
+     * @param $username
+     * @param $password
+     * @return int
+     */
+    public function check_login($username,$password){
+        $sql = 'SELECT COUNT(*) FROM user_info WHERE user_name="' . $username . '" AND user_pwd="' . $password . '"';
+        return $this->db->GetResult($sql);
+    }
+
+    /**
+     * 用户登录日志
+     * @param $username
+     * @param $ip_address
+     * @return null
+     */
+    public function add_log_info($username, $ip_address,$login_time){
+        $sql = 'INSERT INTO log_info(user_name,ip_address,login_date) VALUES("' . $username . '","' . $ip_address . '","' . $login_time . '")';
+        return $this->db->Query($sql);
+    }
+
 }
 
 

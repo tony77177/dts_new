@@ -70,7 +70,7 @@
     </div>
 
     <div style="text-align: center;">
-<!--        <a href="javascript:;" id="btn_token" title="归属地token使用时限查询">归属地token使用时限查询</a>-->
+        <a href="javascript:;" id="btn_token" title="归属地token使用时限查询">归属地token使用时限查询</a>
     </div>
 
 </div>
